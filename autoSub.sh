@@ -1,14 +1,4 @@
 #!/bin/bash
-# Libraries for Ubuntu/Debian people
-apt install libsdl2-dev
-apt install libsdl2-image-dev
-apt install libsdl2-mixer-dev
-apt install libsdl2-ttf-dev
-# Following are WSL specific requirements
-apt install libpng-dev
-apt install libjpeg-dev
-
-
 # Get Submodules
 git clone https://github.com/engineerOfLies/gfc.git
 cd gfc
