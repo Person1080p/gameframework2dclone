@@ -20,7 +20,7 @@ int main(int argc, char * argv[])
     int bx=500,by=300;
     float bf = 0;
     Sprite *bug;
-    Color bugColor = gfc_color8(255,153,0,150);
+    Color bugColor = gfc_color8(255,153,255,150);
     
     /*program initializtion*/
     init_logger("gf2d.log",0);
@@ -52,7 +52,7 @@ int main(int argc, char * argv[])
         mf+=0.1;
         if (mf >= 16.0)mf = 0;
         
-        /*example demo bug animate and move*/
+        /*example demo bug animate*/
         bf+=0.1;
         if (bf >= 16.0)bf = 0;
 
