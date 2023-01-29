@@ -38,4 +38,5 @@ make
 echo "PROJECT READY (hopefully) GO TO PROJECT ROOT TO RUN \"gf2d\""
 
 # Run Project
+cd ..
 ./gf2d
