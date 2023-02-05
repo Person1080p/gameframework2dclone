@@ -3,12 +3,16 @@
 #include "gf2d_sprite.h"
 #include "simple_logger.h"
 
+#include "gme_entity.h"
+
 int main(int argc, char * argv[])
 {
     /*variable declarations*/
     int done = 0;
     const Uint8 * keys;
     Sprite *background;
+
+    Entity *exent;
 
     /*mouse vars*/
     int mx,my;
@@ -35,12 +39,21 @@ int main(int argc, char * argv[])
         0);
     gf2d_graphics_set_frame_delay(16);
     gf2d_sprite_init(1024);
+    gme_entity_init(1024);
     SDL_ShowCursor(SDL_DISABLE);
     
     /*demo setup*/
     background = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
     mouse = gf2d_sprite_load_all("images/pointer.png",32,32,16,0);
     bug = gf2d_sprite_load_all("images/space_bug.png",128,128,16,0);
+    exent = gme_entity_new();
+
+    exent->entity_sprite = gf2d_sprite_load_all(
+            "images/space_bug_top.png",
+            128,
+            128,
+            16,
+            0);
     /*main game loop*/
     while(!done)
     {
@@ -74,7 +87,7 @@ int main(int argc, char * argv[])
                 NULL,
                 &mouseColor,
                 (int)mf);
-
+            gme_entity_draw_all();
         gf2d_graphics_next_frame();// render current draw frame and skip to the next frame
         
         if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
