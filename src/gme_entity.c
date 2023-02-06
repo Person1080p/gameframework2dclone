@@ -86,4 +86,10 @@ void gme_entity_draw_all()
         gme_entity_draw(&entity_manager.entity_list[i]);
     }
 }
+
+void gme_entity_animate(Entity *ent, float final_frame){
+    ent->entity_frame+=0.1;
+    // if (ent->entity_frame >= 16.0)ent->entity_frame = 0;
+    if (ent->entity_frame >= final_frame)ent->entity_frame = 0;
+}
 /*eol@eof*/

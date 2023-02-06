@@ -20,11 +20,6 @@ int main(int argc, char * argv[])
     Sprite *mouse;
     Color mouseColor = gfc_color8(255,153,0,150);
 
-    /*example bug sprite vars*/
-    int bx=500,by=300;
-    float bf = 0;
-    Sprite *bug;
-    Color bugColor = gfc_color8(255,153,255,150);
     
     /*program initializtion*/
     init_logger("gf2d.log",0);
@@ -45,7 +40,6 @@ int main(int argc, char * argv[])
     /*demo setup*/
     background = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
     mouse = gf2d_sprite_load_all("images/pointer.png",32,32,16,0);
-    bug = gf2d_sprite_load_all("images/space_bug.png",128,128,16,0);
     exent = gme_entity_new();
 
     exent->entity_sprite = gf2d_sprite_load_all(
@@ -65,9 +59,6 @@ int main(int argc, char * argv[])
         mf+=0.1;
         if (mf >= 16.0)mf = 0;
         
-        /*example demo bug animate*/
-        bf+=0.1;
-        if (bf >= 16.0)bf = 0;
 
 
         
@@ -76,7 +67,6 @@ int main(int argc, char * argv[])
             //backgrounds drawn first
             gf2d_sprite_draw_image(background,vector2d(0,0));
             //contents next
-            gf2d_sprite_draw(bug,vector2d(bx,by),NULL,NULL,NULL,NULL,&bugColor,(int)bf);
             //UI elements last
             gf2d_sprite_draw(
                 mouse,
@@ -87,9 +77,11 @@ int main(int argc, char * argv[])
                 NULL,
                 &mouseColor,
                 (int)mf);
+            
+            gme_entity_animate(exent, 16.0);
             gme_entity_draw_all();
         gf2d_graphics_next_frame();// render current draw frame and skip to the next frame
-        
+        //HANDLE KEYBOARD INPUT
         if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
         // slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
         // slog("Mouse Pos: %i, %i",mx,my);

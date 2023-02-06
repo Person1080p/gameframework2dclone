@@ -40,4 +40,8 @@ void gme_entity_draw_all();
  */
 void entity_free();
 void gme_entity_close();
+/// @brief continues an entity's enimation
+/// @param ent pointer to entity to animate
+/// @param final_frame final number to animate for the entity
+void gme_entity_animate(Entity *ent, float final_frame);
 #endif
