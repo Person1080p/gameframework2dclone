@@ -1,37 +1,25 @@
-#include <simple_logger.h>
+#include "simple_logger.h"
+#include "gf2d_draw.h"
 #include "gme_entity.h"
-// #include "gf2d_sprite.c"
-// #include "gf2d_sprite.h"
-typedef struct{
-    Uint32 entity_max;
-    Entity * entity_list;
+
+typedef struct
+{
+    Uint32  entity_max;
+    Entity *entity_list;
+    SJson  *entity_def;
 }EntityManager;
 
-static EntityManager entity_manager = {0}; //I dont know what this really does yet, will figure out l8r
-void entity_free(Entity *ent)
+static EntityManager entity_manager = {0};
+
+void gme_entity_manager_close()
 {
-    if (!ent)
-    {
-        slog("no entity provided");
-        return;
-    }
-    if (ent->entity_sprite)gf2d_sprite_free(ent->entity_sprite);
-    memset(ent,0,sizeof(Entity));
-}
-
-
-void gme_entity_close(){
-    // gme_entity_clear_all();
-    int i;
-    for (i = 0; i < entity_manager.entity_max;i++){
-        if (!entity_manager.entity_list[i]._inuse)continue;
-        entity_free(&entity_manager.entity_list[i]);
-    }
-    // entity_manager.entity_list = NULL;
-    // entity_manager.max_entity = 0;
+    gme_entity_free_all();
+    if (entity_manager.entity_list)free(entity_manager.entity_list);
     slog("entity system closed");
 }
-void gme_entity_init(Uint32 max){//PROBABLY WRONG, CHECK l8R
+
+void gme_entity_manager_init(Uint32 max)
+{
     if (max <= 0)
     {
         slog("cannot intialize entity system: zero entities specified!");
@@ -44,19 +32,41 @@ void gme_entity_init(Uint32 max){//PROBABLY WRONG, CHECK l8R
         return;
     }
     entity_manager.entity_max = max;
-    atexit(gme_entity_close);
+    entity_manager.entity_def = sj_load("config/entities.def");
+    atexit(gme_entity_manager_close);
     slog("entity system initialized");
 }
+
+void gme_entity_free_all()
+{
+    int i;
+    for (i = 0; i < entity_manager.entity_max;i++)
+    {
+        if (!entity_manager.entity_list[i]._entity_inuse)continue;
+        gme_entity_free(&entity_manager.entity_list[i]);
+    }
+}
+
 Entity *gme_entity_new()
 {
     int i;
     for (i = 0; i < entity_manager.entity_max;i++)
     {
-        if (entity_manager.entity_list[i]._inuse)continue;
-        entity_manager.entity_list[i]._inuse = 1;
+        if (entity_manager.entity_list[i]._entity_inuse)continue;
+        entity_manager.entity_list[i]._entity_inuse = 1;
         return &entity_manager.entity_list[i];
     }
     return NULL;
+}
+
+void gme_entity_free(Entity *ent)
+{
+    if (!ent)
+    {
+        return;
+    }
+    if (ent->entity_sprite)gf2d_sprite_free(ent->entity_sprite);
+    memset(ent,0,sizeof(Entity));
 }
 
 void gme_entity_draw(Entity *ent)
@@ -66,30 +76,82 @@ void gme_entity_draw(Entity *ent)
     {
         gf2d_sprite_draw(
             ent->entity_sprite,
-            ent->entity_pos,
+            ent->position,
             NULL,
-            NULL,// &ent->entity_drawOffset,
-            NULL,// &ent->entity_rotation,
+            &ent->entity_drawOffset,
+            &ent->entity_rotation,
             NULL,
             NULL,
             (Uint32)ent->entity_frame);
     }
-    // gf2d_draw_pixel(ent->entity_pos,GFC_COLOR_YELLOW);
-    // gf2d_draw_circle(ent->entity_pos,10,GFC_COLOR_YELLOW);
+    // gf2d_draw_pixel(ent->position,GFC_COLOR_YELLOW);
+    // gf2d_draw_circle(ent->position,10,GFC_COLOR_YELLOW);
 }
+
 void gme_entity_draw_all()
 {
     int i;
     for (i = 0; i < entity_manager.entity_max;i++)
     {
-        if (!entity_manager.entity_list[i]._inuse)continue;
+        if (!entity_manager.entity_list[i]._entity_inuse)continue;
         gme_entity_draw(&entity_manager.entity_list[i]);
     }
 }
 
-void gme_entity_animate(Entity *ent, float final_frame){
-    ent->entity_frame+=0.1;
-    // if (ent->entity_frame >= 16.0)ent->entity_frame = 0;
-    if (ent->entity_frame >= final_frame)ent->entity_frame = 0;
+void gme_entity_update(Entity *ent)
+{
+    if (!ent)return;
+    if (ent->update)
+    {
+        if (ent->update(ent))return;// if the update function returns 1, do not do generic update
+    }
+    ent->entity_frame += 0.1;
+    if (ent->entity_frame >= 16)ent->entity_frame = 0;
+    vector2d_add(ent->position,ent->position,ent->velocity);
+    if(vector2d_magnitude_compare(ent->velocity,0) != 0)
+    {
+        //means the vector is non zero
+        ent->entity_rotation = (vector2d_angle(ent->velocity) + 180);
+//        angle_clamp_radians(&ent->rotation);
+    }
 }
+
+void gme_entity_update_all()
+{
+    int i;
+    for (i = 0; i < entity_manager.entity_max;i++)
+    {
+        if (!entity_manager.entity_list[i]._entity_inuse)continue;
+        gme_entity_update(&entity_manager.entity_list[i]);
+    }
+}
+
+void gme_entity_think(Entity *ent)
+{
+    if (!ent)return;
+    if (ent->think)ent->think(ent);
+}
+
+void gme_entity_think_all()
+{
+    int i;
+    for (i = 0; i < entity_manager.entity_max;i++)
+    {
+        if (!entity_manager.entity_list[i]._entity_inuse)continue;
+        gme_entity_think(&entity_manager.entity_list[i]);
+    }
+}
+
+SJson *gme_entity_get_def_by_name(const char *name)
+{
+//    int i,c;
+    if (!name)return NULL;
+    
+    return NULL;
+}
+void gme_entity_animate(Entity *ent, float frame_start, float frame_final){
+    ent->entity_frame+=0.1;
+    if (ent->entity_frame >= frame_final)ent->entity_frame = frame_start;
+}
+
 /*eol@eof*/

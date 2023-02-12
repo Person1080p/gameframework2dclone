@@ -7,11 +7,12 @@
 typedef struct Menu_S{
     Entity *button_start;
     Entity *button_exit;
-    int pos;
+    Vector2D pos;
 }Menu;
 
 /// @brief creates all entites and renders the game start menu
 void gme_menu_init();
+
 
 /// @brief exits the menu
 void gme_menu_exit();

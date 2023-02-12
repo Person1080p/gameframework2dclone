@@ -34,20 +34,29 @@ int main(int argc, char * argv[])
         0);
     gf2d_graphics_set_frame_delay(16);
     gf2d_sprite_init(1024);
-    gme_entity_init(1024);
+    gme_entity_manager_init(1024);
     SDL_ShowCursor(SDL_DISABLE);
     
     /*demo setup*/
     background = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
     mouse = gf2d_sprite_load_all("images/pointer.png",32,32,16,0);
-    exent = gme_entity_new();
 
+    exent = gme_entity_new();
     exent->entity_sprite = gf2d_sprite_load_all(
-            "images/space_bug_top.png",
+            "images/space_bug.png",
             128,
             128,
             16,
             0);
+    
+    Entity *start = gme_entity_new();
+    start->entity_sprite = gf2d_sprite_load_all(
+            "menu/start.png",
+            32,
+            32,
+            1,
+            0);
+    // start->entity_sprite.scale
     /*main game loop*/
     while(!done)
     {
@@ -78,7 +87,26 @@ int main(int argc, char * argv[])
                 &mouseColor,
                 (int)mf);
             
-            gme_entity_animate(exent, 16.0);
+            gme_entity_animate(exent, 0, 16.0);
+            // exent->position = vector2d(mf*10+mf,mf*10+mf);
+            float speed = 10;
+            if (keys[SDL_SCANCODE_W]) exent->position = vector2d(exent->position.x,exent->position.y-speed);
+            if (keys[SDL_SCANCODE_S]) exent->position = vector2d(exent->position.x,exent->position.y+speed);
+            if (keys[SDL_SCANCODE_A]) exent->position = vector2d(exent->position.x-speed,exent->position.y);
+            if (keys[SDL_SCANCODE_D]) exent->position = vector2d(exent->position.x+speed,exent->position.y);
+
+
+            if(exent->position.y<0) exent->position.y=0;
+            if(exent->position.x>1080) exent->position.x=1080;
+            if(exent->position.y>600) exent->position.y=600;
+            if(exent->position.x<0) exent->position.x=0;
+
+            slog("Bug Pos: %f, %f",exent->position.x,exent->position.y);
+
+
+
+            // start->position=vector2d(mx,my);
+            // gme_entity_animate(exent, 1, 16.0);
             gme_entity_draw_all();
         gf2d_graphics_next_frame();// render current draw frame and skip to the next frame
         //HANDLE KEYBOARD INPUT
