@@ -1,3 +1,13 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdarg.h>
+#include <string.h>
+#include <math.h>
+#include <assert.h>
+#include <limits.h>
+#include <time.h>
+
 #include <SDL.h>
 #include "gf2d_graphics.h"
 #include "gf2d_sprite.h"
@@ -53,6 +63,9 @@ int main(int argc, char * argv[])
     SDL_ShowCursor(SDL_DISABLE);
 
     struct nk_context *ctx;
+    SDL_Window* win = gf2d_graphics_get_window();
+    SDL_Renderer* renderer = gf2d_graphics_get_renderer();
+    ctx = nk_sdl_init(win, renderer);
     // ctx = nk_sdl_init(win, renderer);
     float font_scale = 1;
     struct nk_font_atlas *atlas;
@@ -96,7 +109,7 @@ int main(int argc, char * argv[])
         if (mf >= 16.0)mf = 0;
         //
 
-        calculator(ctx)
+        calculator(ctx);
         //
         gf2d_graphics_clear_screen();// clears drawing buffers
         // all drawing should happen betweem clear_screen and next_frame
@@ -141,14 +154,12 @@ int main(int argc, char * argv[])
         SDL_Event evt;
         // slog("%i",SDL_QUIT);
         SDL_PollEvent(&evt);
-        if (keys[SDL_SCANCODE_ESCAPE]||(evt.type == SDL_QUIT))done = 1; // exit condition
+        if (keys[SDL_SCANCODE_ESCAPE]||(evt.type == SDL_QUIT))done = 1; // exit condition//TODO fgd
         // slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
         // slog("Mouse Pos: %i, %i",mx,my);
     }
-    nk_sdl_shutdown();
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(win);
-    SDL_Quit();
+    nk_sdl_shutdown();//TODO fgd
+    SDL_Quit();////TODO fgd
     slog("---==== END ====---");
     return 0;
 }

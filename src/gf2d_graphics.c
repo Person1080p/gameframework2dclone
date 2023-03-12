@@ -41,7 +41,7 @@ int    __DebugMode = 0;
 
 /*forward declarations*/
 void gf2d_graphics_close();
-
+//used to be void
 void gf2d_graphics_initialize(
     char *windowName,
     int viewWidth,
@@ -156,6 +156,7 @@ void gf2d_graphics_initialize(
 
     atexit(gf2d_graphics_close);
     slog("graphics initialized");
+    return;
 }
 
 void gf2d_graphics_save_screenshot(const char *filename)
@@ -403,5 +404,7 @@ SDL_Surface *gf2d_graphics_screen_convert(SDL_Surface **surface)
     *surface = NULL;
     return convert;
 }
-
+SDL_Window* gf2d_graphics_get_window(){
+    return gf2d_graphics.main_window;
+}
 /*eol@eof*/

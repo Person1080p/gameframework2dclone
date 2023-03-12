@@ -120,6 +120,8 @@ SDL_Surface *gf2d_graphics_get_render();
  */
 void gf2d_graphics_save_screenshot(const char *filename);
 
+SDL_Window* gf2d_graphics_get_window();
+
 
 
 #endif

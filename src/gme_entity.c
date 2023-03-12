@@ -32,7 +32,7 @@ void gme_entity_manager_init(Uint32 max)
         return;
     }
     entity_manager.entity_max = max;
-    entity_manager.entity_def = sj_load("config/entities.def");
+    // entity_manager.entity_def = sj_load("config/entities.def");
     atexit(gme_entity_manager_close);
     slog("entity system initialized");
 }
