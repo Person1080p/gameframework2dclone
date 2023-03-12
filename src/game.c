@@ -8,7 +8,7 @@
 #include <limits.h>
 #include <time.h>
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include "gf2d_graphics.h"
 #include "gf2d_sprite.h"
 #include "simple_logger.h"
@@ -62,21 +62,23 @@ int main(int argc, char * argv[])
     gme_entity_manager_init(1024);
     SDL_ShowCursor(SDL_DISABLE);
 
-    struct nk_context *ctx;
+    struct nk_context *ctx = NULL;
     SDL_Window* win = gf2d_graphics_get_window();
     SDL_Renderer* renderer = gf2d_graphics_get_renderer();
+    // win.
     ctx = nk_sdl_init(win, renderer);
     // ctx = nk_sdl_init(win, renderer);
-    float font_scale = 1;
-    struct nk_font_atlas *atlas;
-    struct nk_font_config config = nk_font_config(0);
-    struct nk_font *font;
-    nk_sdl_font_stash_begin(&atlas);
-    font = nk_font_atlas_add_default(atlas, 13 * font_scale, &config);
-    nk_sdl_font_stash_end();
-    font->handle.height /= font_scale;
-    nk_style_set_font(ctx, &font->handle);
-    
+    {
+        float font_scale = 1;
+        struct nk_font_atlas *atlas;
+        struct nk_font_config config = nk_font_config(0);
+        struct nk_font *font;
+        nk_sdl_font_stash_begin(&atlas);
+        font = nk_font_atlas_add_default(atlas, 13 * font_scale, &config);
+        nk_sdl_font_stash_end();
+        font->handle.height /= font_scale;
+        nk_style_set_font(ctx, &font->handle);
+    }
     /*demo setup*/
     background = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
     mouse = gf2d_sprite_load_all("images/pointer.png",32,32,16,0);
@@ -98,6 +100,9 @@ int main(int argc, char * argv[])
     //         0);
     // start->entity_sprite.scale
     /*main game loop*/
+            slog("thing");
+        calculator(ctx);
+        slog("thing2");
     while(!done)
     {
         SDL_PumpEvents();   // update SDL's internal event structures
@@ -109,7 +114,7 @@ int main(int argc, char * argv[])
         if (mf >= 16.0)mf = 0;
         //
 
-        calculator(ctx);
+
         //
         gf2d_graphics_clear_screen();// clears drawing buffers
         // all drawing should happen betweem clear_screen and next_frame
@@ -158,8 +163,8 @@ int main(int argc, char * argv[])
         // slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
         // slog("Mouse Pos: %i, %i",mx,my);
     }
-    nk_sdl_shutdown();//TODO fgd
-    SDL_Quit();////TODO fgd
+    // nk_sdl_shutdown();//TODO fgd
+    // SDL_Quit();////TODO fgd
     slog("---==== END ====---");
     return 0;
 }
