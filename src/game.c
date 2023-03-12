@@ -1,11 +1,7 @@
 #include <SDL.h>
-#include <nuklear.h>
-#include <nuklear_sdl_renderer.h>
 #include "gf2d_graphics.h"
 #include "gf2d_sprite.h"
 #include "simple_logger.h"
-
-#include "gme_entity.h"
 
 #define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
@@ -16,6 +12,12 @@
 #define NK_INCLUDE_DEFAULT_FONT
 #define NK_IMPLEMENTATION
 #define NK_SDL_RENDERER_IMPLEMENTATION
+#include "nuklear.h"
+#include "nuklear_sdl_renderer.h"
+
+#include "calculator.c"
+
+#include "gme_entity.h"
 
 int main(int argc, char * argv[])
 {
@@ -31,15 +33,14 @@ int main(int argc, char * argv[])
     float mf = 0;
     Sprite *mouse;
     Color mouseColor = gfc_color8(255,153,0,150);
-     struct nk_context *ctx;
 
-    ctx = nk_sdl_init(win, renderer);
+
 
     /*program initializtion*/
     init_logger("gf2d.log",0);
     slog("---==== BEGIN ====---");
     gf2d_graphics_initialize(
-        "gf2d",
+        "game",
         1200,
         720,
         1200,
@@ -50,6 +51,18 @@ int main(int argc, char * argv[])
     gf2d_sprite_init(1024);
     gme_entity_manager_init(1024);
     SDL_ShowCursor(SDL_DISABLE);
+
+    struct nk_context *ctx;
+    // ctx = nk_sdl_init(win, renderer);
+    float font_scale = 1;
+    struct nk_font_atlas *atlas;
+    struct nk_font_config config = nk_font_config(0);
+    struct nk_font *font;
+    nk_sdl_font_stash_begin(&atlas);
+    font = nk_font_atlas_add_default(atlas, 13 * font_scale, &config);
+    nk_sdl_font_stash_end();
+    font->handle.height /= font_scale;
+    nk_style_set_font(ctx, &font->handle);
     
     /*demo setup*/
     background = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
@@ -81,10 +94,10 @@ int main(int argc, char * argv[])
         SDL_GetMouseState(&mx,&my);
         mf+=0.1;
         if (mf >= 16.0)mf = 0;
-        
+        //
 
-
-        
+        calculator(ctx)
+        //
         gf2d_graphics_clear_screen();// clears drawing buffers
         // all drawing should happen betweem clear_screen and next_frame
             //backgrounds drawn first
@@ -132,6 +145,10 @@ int main(int argc, char * argv[])
         // slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
         // slog("Mouse Pos: %i, %i",mx,my);
     }
+    nk_sdl_shutdown();
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(win);
+    SDL_Quit();
     slog("---==== END ====---");
     return 0;
 }
