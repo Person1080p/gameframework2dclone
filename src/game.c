@@ -1,9 +1,21 @@
 #include <SDL.h>
+#include <nuklear.h>
+#include <nuklear_sdl_renderer.h>
 #include "gf2d_graphics.h"
 #include "gf2d_sprite.h"
 #include "simple_logger.h"
 
 #include "gme_entity.h"
+
+#define NK_INCLUDE_FIXED_TYPES
+#define NK_INCLUDE_STANDARD_IO
+#define NK_INCLUDE_STANDARD_VARARGS
+#define NK_INCLUDE_DEFAULT_ALLOCATOR
+#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#define NK_INCLUDE_FONT_BAKING
+#define NK_INCLUDE_DEFAULT_FONT
+#define NK_IMPLEMENTATION
+#define NK_SDL_RENDERER_IMPLEMENTATION
 
 int main(int argc, char * argv[])
 {
@@ -19,8 +31,10 @@ int main(int argc, char * argv[])
     float mf = 0;
     Sprite *mouse;
     Color mouseColor = gfc_color8(255,153,0,150);
+     struct nk_context *ctx;
 
-    
+    ctx = nk_sdl_init(win, renderer);
+
     /*program initializtion*/
     init_logger("gf2d.log",0);
     slog("---==== BEGIN ====---");
@@ -49,13 +63,13 @@ int main(int argc, char * argv[])
             16,
             0);
     
-    Entity *start = gme_entity_new();
-    start->entity_sprite = gf2d_sprite_load_all(
-            "menu/start.png",
-            32,
-            32,
-            1,
-            0);
+    // Entity *start = gme_entity_new();
+    // start->entity_sprite = gf2d_sprite_load_all(
+    //         "menu/start.png",
+    //         32,
+    //         32,
+    //         1,
+    //         0);
     // start->entity_sprite.scale
     /*main game loop*/
     while(!done)
@@ -101,7 +115,7 @@ int main(int argc, char * argv[])
             if(exent->position.y>600) exent->position.y=600;
             if(exent->position.x<0) exent->position.x=0;
 
-            slog("Bug Pos: %f, %f",exent->position.x,exent->position.y);
+            // slog("Bug Pos: %f, %f",exent->position.x,exent->position.y);
 
 
 
@@ -110,7 +124,11 @@ int main(int argc, char * argv[])
             gme_entity_draw_all();
         gf2d_graphics_next_frame();// render current draw frame and skip to the next frame
         //HANDLE KEYBOARD INPUT
-        if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
+        // if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
+        SDL_Event evt;
+        // slog("%i",SDL_QUIT);
+        SDL_PollEvent(&evt);
+        if (keys[SDL_SCANCODE_ESCAPE]||(evt.type == SDL_QUIT))done = 1; // exit condition
         // slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
         // slog("Mouse Pos: %i, %i",mx,my);
     }
