@@ -37,7 +37,7 @@ typedef struct Character
 
 Character Pikachu =
     {
-        "Pikachu",
+        "Player",
         1,
         120,
         120,
@@ -45,7 +45,7 @@ Character Pikachu =
         {{"Tackle",
           10,
           15},
-         {"Shock",
+         {"Fire",
           10,
           30}}};
 
