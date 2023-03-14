@@ -2,6 +2,16 @@
 #define __GF2D_GRAPHICS_C__
 
 #include <SDL.h>
+#define NK_INCLUDE_FIXED_TYPES
+#define NK_INCLUDE_DEFAULT_ALLOCATOR
+#define NK_INCLUDE_STANDARD_VARARGS
+#define NK_INCLUDE_FIXED_TYPES
+#define NK_INCLUDE_STANDARD_IO
+#define NK_INCLUDE_FONT_BAKING
+#define NK_INCLUDE_DEFAULT_FONT
+#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#include "nuklear.h"
+#include "nuklear_sdl_renderer.h"
 
 #include "gfc_types.h"
 #include "gfc_vector.h"
@@ -120,8 +130,7 @@ SDL_Surface *gf2d_graphics_get_render();
  */
 void gf2d_graphics_save_screenshot(const char *filename);
 
-SDL_Window* gf2d_graphics_get_window();
-
+struct nk_context* gf2d_nuklear_init();
 
 
 #endif

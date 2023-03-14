@@ -1,4 +1,17 @@
-#include <SDL.h>
+//#include <SDL.h>
+//#define NK_INCLUDE_FIXED_TYPES
+//#define NK_INCLUDE_DEFAULT_ALLOCATOR
+//#define NK_INCLUDE_STANDARD_VARARGS
+//#define NK_INCLUDE_FIXED_TYPES
+//#define NK_INCLUDE_STANDARD_IO
+//#define NK_INCLUDE_FONT_BAKING
+//#define NK_INCLUDE_DEFAULT_FONT
+//#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+//#define NK_IMPLEMENTATION
+//#define NK_SDL_RENDERER_IMPLEMENTATION
+//#include "nuklear.h"
+//#include "nuklear_sdl_renderer.h"
+
 #include <SDL_image.h>
 #include <stdlib.h>
 
@@ -41,6 +54,7 @@ int    __DebugMode = 0;
 
 /*forward declarations*/
 void gf2d_graphics_close();
+
 void gf2d_graphics_initialize(
     char *windowName,
     int viewWidth,
@@ -155,7 +169,6 @@ void gf2d_graphics_initialize(
 
     atexit(gf2d_graphics_close);
     slog("graphics initialized");
-    return;
 }
 
 void gf2d_graphics_save_screenshot(const char *filename)
@@ -403,7 +416,54 @@ SDL_Surface *gf2d_graphics_screen_convert(SDL_Surface **surface)
     *surface = NULL;
     return convert;
 }
-SDL_Window *gf2d_graphics_get_window(){
-    return gf2d_graphics.main_window;
+
+struct nk_context* gf2d_nuklear_init()
+{
+	SDL_Renderer* ren = gf2d_graphics.renderer;
+	SDL_Window* win = gf2d_graphics.main_window;
+    /* scale the renderer output for High-DPI displays */
+    float font_scale;
+    {
+        int render_w, render_h;
+        int window_w, window_h;
+        float scale_x, scale_y;
+        SDL_GetRendererOutputSize(ren, &render_w, &render_h);
+        SDL_GetWindowSize(win, &window_w, &window_h);
+        scale_x = (float)(render_w) / (float)(window_w);
+        scale_y = (float)(render_h) / (float)(window_h);
+        SDL_RenderSetScale(ren, scale_x, scale_y);
+        font_scale = scale_y;
+    }
+
+    /* GUI */
+    struct nk_context *ctx = nk_sdl_init(win, ren);
+    /* Load Fonts: if none of these are loaded a default font will be used  */
+    /* Load Cursor: if you uncomment cursor loading please hide the cursor */
+    {
+        struct nk_font_atlas *atlas;
+        struct nk_font_config config = nk_font_config(0);
+        struct nk_font *font;
+
+        /* set up the font atlas and add desired font; note that font sizes are
+         * multiplied by font_scale to produce better results at higher DPIs */
+        nk_sdl_font_stash_begin(&atlas);
+        font = nk_font_atlas_add_default(atlas, 13 * font_scale, &config);
+        /*font = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14 * font_scale, &config);*/
+        /*font = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Roboto-Regular.ttf", 16 * font_scale, &config);*/
+        /* font = nk_font_atlas_add_from_file(atlas, "../../../extra_font/kenvector_future_thin.ttf", 13 * font_scale, &config); */
+        /*font = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12 * font_scale, &config);*/
+        /*font = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10 * font_scale, &config);*/
+        /*font = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13 * font_scale, &config);*/
+        nk_sdl_font_stash_end();
+
+        /* this hack makes the font appear to be scaled down to the desired
+         * size and is only necessary when font_scale > 1 */
+        font->handle.height /= font_scale;
+        /*nk_style_load_all_cursors(ctx, atlas->cursors);*/
+        nk_style_set_font(ctx, &font->handle);
+    }
+
+    return ctx;
 }
+
 /*eol@eof*/
