@@ -24,9 +24,11 @@ typedef struct Action
 int turn_player;
 
 Action *current_action;
-#define ATTACK_DELAY 2000
-int attack_timer;
+#define TURN_DELAY 2000
+int press_time;
 
+#define TRUE 1
+#define FALSE 0
 typedef struct Character
 {
     char name[50];
@@ -101,11 +103,15 @@ void menu_item(struct nk_context *ctx, Inventory *i);
 
 int action_rng(int max, int min);
 
-void action_dmg(Character* enemyc, Action act);
+int action_dmg(Character* enemyc, Action act);
+
+int battle();
+
+int battle_now =1;
 
 int main(int argc, char *argv[])
 {
-    char *out = "A New Battle";
+    char *out = "A Heated Battle";
     turn_player = 0; // now player turn
     /*variable declarations*/
     int done = 0;
@@ -143,8 +149,7 @@ int main(int argc, char *argv[])
     background = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
     mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
 
-    Sprite *playerSprite = gf2d_sprite_load_image("images/demon/4.png");
-    Sprite *enemySprite = gf2d_sprite_load_image("images/demon/2.png");
+
 
     while (!done)
     {
@@ -178,39 +183,16 @@ int main(int argc, char *argv[])
         gf2d_sprite_draw_image(background, vector2d(0, 0));
         // contents next
         // UI elements last
-        if (turn_player)
-        {
-        }
 
-        int cur_time = SDL_GetTicks();
-        if (current_action)
-        {
             // SDL_asprintf(&out, "Char's %s did %d", current_action->name, (current_action->max_dam, current_action->min_dam));
             // SDL_asprintf(&out, "Char's %s did Damage", current_action->name);
             // slog(out);
             // slog("Player Turn: %i", turn_player);
-            if (cur_time - attack_timer > ATTACK_DELAY)
-            {
-                action_dmg(&Enemy, *current_action);
-                current_action = NULL;
-                attack_timer = 0;
-                turn_player = 0;
-                out = "Battle Continues";
-                slog(out);
-                slog("Player Turn: %i", turn_player);
+        if(battle_now){
+            if(battle(ctx ,out)){
+                battle_now = FALSE;
             }
-            // do attack
         }
-        // if(cur_time - attack_timer > ATTACK_DELAY){
-        //     out ="Battle Continues";
-        // }
-        gf2d_sprite_draw_image(playerSprite, vector2d(0, 0));
-        gf2d_sprite_draw_image(enemySprite, vector2d(700, -150));
-        menu_attack(ctx, &Player);
-        menu_enemy(ctx, &Enemy);
-        menu_item(ctx, &inventory);
-        menu_output(ctx, out);
-        nk_sdl_render(NK_ANTI_ALIASING_ON);
 
         gf2d_sprite_draw(
             mouse,
@@ -285,7 +267,7 @@ void menu_attack(struct nk_context *ctx, Character *c)
                     turn_player = 1; // no more player turn
                     slog("Player Turn: %i", turn_player);
                     current_action = &c->attacks[i];
-                    attack_timer = SDL_GetTicks();
+                    press_time = SDL_GetTicks();
                 }
             }
         }
@@ -306,7 +288,7 @@ void menu_item(struct nk_context *ctx, Inventory *in)
             if (nk_button_label(ctx, in->item[i].name))
             {
                 current_action = &in->item[i]; // fix later  u bum
-                attack_timer = SDL_GetTicks();
+                press_time = SDL_GetTicks();
             }
         }
     }
@@ -317,16 +299,74 @@ int action_rng(int max, int min)
 {
     return rand() % (max - min) + min;
 }
-void action_dmg(Character* target, Action act){
+/// @brief true = lethal, false is not
+/// @param target 
+/// @param act 
+/// @return 
+int action_dmg(Character* target, Action act){
     int damage = action_rng(act.max_dam,act.min_dam);
     slog("SPELL DID THIS %i", damage);
     target->hp -= damage;
     slog("ENEMY HP%i", target->hp);
     if(target->hp<0){
         slog("YOU WIN");
+        return TRUE;
     }
     else{
         slog("Continue Battle");
+        return FALSE;
     }
+}
+
+/// @brief true = end, false = contine
+/// @param ctx 
+/// @param out 
+/// @return 
+int battle(struct nk_context *ctx , char* out)
+{
+    Sprite *playerSprite = gf2d_sprite_load_image("images/demon/4.png");
+    Sprite *enemySprite = gf2d_sprite_load_image("images/demon/2.png");
+    int cur_time = SDL_GetTicks();
+        if (current_action)
+        {
+            int time =cur_time - press_time;
+            // slog("%i",time);
+            
+            if(time > TURN_DELAY*3)
+            {
+                out ="Next";
+                current_action = NULL;
+            }
+            else if(time > TURN_DELAY*2)
+            {
+                current_action = &Enemy.attacks[0];
+                action_dmg(&Player, *current_action);
+                out = "Player 2 Instance";
+                slog(out);
+                slog("Player Turn: %i", turn_player);
+            }
+            else if (time > TURN_DELAY)
+            {
+                if(action_dmg(&Enemy, *current_action)){
+                    return FALSE;
+                }
+                // current_action = NULL;
+                out = "Player 1 Instance";
+                slog(out);
+                // slog("Player Turn: %i", turn_player);
+                // press_time = SDL_GetTicks();
+            }
+        }
+        // if(cur_time - attack_timer > ATTACK_DELAY){
+        //     out ="Battle Continues";
+        // }
+        gf2d_sprite_draw_image(playerSprite, vector2d(0, 0));
+        gf2d_sprite_draw_image(enemySprite, vector2d(700, -150));
+        menu_attack(ctx, &Player);
+        menu_enemy(ctx, &Enemy);
+        menu_item(ctx, &inventory);
+        menu_output(ctx, out);
+        nk_sdl_render(NK_ANTI_ALIASING_ON);
+        return FALSE;
 }
 /*eol@eof*/
