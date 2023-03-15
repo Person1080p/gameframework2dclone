@@ -5,6 +5,7 @@
 #include "gfc_vector.h"
 
 #include "gf2d_sprite.h"
+#include "camera.h"
 
 typedef struct Entity_S
 {
@@ -71,5 +72,8 @@ void gme_entity_think_all();
 /// @param frame_start start pos of animation
 /// @param frame_final max value of animation
 void gme_entity_animate(Entity *ent, float frame_start, float frame_final);
+
+void gme_entity_think(Entity *self);
+
 
 #endif

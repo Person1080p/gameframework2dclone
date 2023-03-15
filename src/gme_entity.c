@@ -126,11 +126,11 @@ void gme_entity_update_all()
     }
 }
 
-void gme_entity_think(Entity *ent)
-{
-    if (!ent)return;
-    if (ent->think)ent->think(ent);
-}
+// void gme_entity_think(Entity *ent)
+// {
+//     if (!ent)return;
+//     if (ent->think)ent->think(ent);
+// }
 
 void gme_entity_think_all()
 {
@@ -153,5 +153,29 @@ void gme_entity_animate(Entity *ent, float frame_start, float frame_final){
     ent->entity_frame+=0.1;
     if (ent->entity_frame >= frame_final)ent->entity_frame = frame_start;
 }
+
+void gme_entity_think(Entity *self)
+{
+    Vector2D m,dir,camera;
+    int mx,my;
+    if (!self)return;
+    camera = camera_get_position();
+    SDL_GetMouseState(&mx,&my);
+    m.x = mx;
+    m.y = my;
+    vector2d_add(m,m,camera);
+    vector2d_sub(dir,m,self->position);
+    if (vector2d_magnitude_compare(dir,10)>0)
+    {
+        vector2d_set_magnitude(&dir,self->entity_speed);
+        vector2d_copy(self->velocity,dir);
+    }
+    else
+    {
+        vector2d_clear(self->velocity);
+    }
+    camera_center_at(self->position);
+}
+
 
 /*eol@eof*/

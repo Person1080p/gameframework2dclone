@@ -4,6 +4,12 @@
 #include "simple_logger.h"
 #include "gf2d_graphics.h"
 #include "gf2d_sprite.h"
+
+#include "level.h"
+#include "camera.h"
+
+#include "gme_entity.h"
+
 enum
 {
     DELAY,
@@ -103,11 +109,11 @@ void menu_item(struct nk_context *ctx, Inventory *i);
 
 int action_rng(int max, int min);
 
-int action_dmg(Character* enemyc, Action act);
+int action_dmg(Character *enemyc, Action act);
 
 int battle();
 
-int battle_now =1;
+int battle_now = 0;
 
 int main(int argc, char *argv[])
 {
@@ -117,8 +123,10 @@ int main(int argc, char *argv[])
     int done = 0;
     const Uint8 *keys;
     Sprite *background;
-
-    // Entity *exent;
+    Level *level;
+    Entity *exent;
+    // gme_entity_init(1024);
+    gme_entity_manager_init(1024);
 
     /*mouse vars*/
     int mx, my;
@@ -149,7 +157,16 @@ int main(int argc, char *argv[])
     background = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
     mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
 
+    level = level_load("config/test.level");
+    level_set_active_level(level);
 
+    exent = gme_entity_new();
+    exent->entity_sprite = gf2d_sprite_load_all(
+        "images/space_bug.png",
+        128,
+        128,
+        16,
+        0);
 
     while (!done)
     {
@@ -184,14 +201,49 @@ int main(int argc, char *argv[])
         // contents next
         // UI elements last
 
-            // SDL_asprintf(&out, "Char's %s did %d", current_action->name, (current_action->max_dam, current_action->min_dam));
-            // SDL_asprintf(&out, "Char's %s did Damage", current_action->name);
-            // slog(out);
-            // slog("Player Turn: %i", turn_player);
-        if(battle_now){
-            if(battle(ctx ,out)){
+        // SDL_asprintf(&out, "Char's %s did %d", current_action->name, (current_action->max_dam, current_action->min_dam));
+        // SDL_asprintf(&out, "Char's %s did Damage", current_action->name);
+        // slog(out);
+        // slog("Player Turn: %i", turn_player);
+        if (battle_now)
+        {
+            if (battle(ctx, out))
+            {
                 battle_now = FALSE;
             }
+        }
+        else
+        {
+            gme_entity_animate(exent, 0, 16.0);
+            // exent->position = vector2d(mf*10+mf,mf*10+mf);
+            float speed = 10;
+            if (keys[SDL_SCANCODE_W])
+                exent->position = vector2d(exent->position.x, exent->position.y - speed);
+            if (keys[SDL_SCANCODE_S])
+                exent->position = vector2d(exent->position.x, exent->position.y + speed);
+            if (keys[SDL_SCANCODE_A])
+                exent->position = vector2d(exent->position.x - speed, exent->position.y);
+            if (keys[SDL_SCANCODE_D])
+                exent->position = vector2d(exent->position.x + speed, exent->position.y);
+
+            // if (exent->position.y < 0)
+            //     exent->position.y = 0;
+            // if (exent->position.x > 1080)
+            //     exent->position.x = 1080;
+            // if (exent->position.y > 600)
+            //     exent->position.y = 600;
+            // if (exent->position.x < 0)
+            //     exent->position.x = 0;
+
+            slog("Bug Pos: %f, %f", exent->position.x, exent->position.y);
+
+            // start->position=vector2d(mx,my);
+            // gme_entity_animate(exent, 1, 16.0);
+            level_draw(level_get_active_level());
+            gme_entity_draw_all();
+            gme_entity_think(exent);
+            // Vector2D mousep = vector2d(mx,my);
+            camera_world_snap();
         }
 
         gf2d_sprite_draw(
@@ -206,12 +258,13 @@ int main(int argc, char *argv[])
 
         gf2d_graphics_next_frame(); // render current draw frame and skip to the next frame
 
+        // camera_center_at(mousep);
         // slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
         // slog("Mouse at %i , %i",mx,my);
         if (keys[SDL_SCANCODE_ESCAPE])
             done = 1; // exit condition
     }
-
+    level_free(level);
     nk_sdl_shutdown();
     slog("---==== END ====---");
     return 0;
@@ -239,7 +292,6 @@ void menu_enemy(struct nk_context *ctx, Character *c)
 
         nk_label(ctx, c->name, NK_TEXT_LEFT);
 
-        
         nk_label(ctx, enemy_status, NK_TEXT_LEFT);
     }
     nk_end(ctx);
@@ -300,73 +352,77 @@ int action_rng(int max, int min)
     return rand() % (max - min) + min;
 }
 /// @brief true = lethal, false is not
-/// @param target 
-/// @param act 
-/// @return 
-int action_dmg(Character* target, Action act){
-    int damage = action_rng(act.max_dam,act.min_dam);
+/// @param target
+/// @param act
+/// @return
+int action_dmg(Character *target, Action act)
+{
+    int damage = action_rng(act.max_dam, act.min_dam);
     slog("SPELL DID THIS %i", damage);
     target->hp -= damage;
     slog("ENEMY HP%i", target->hp);
-    if(target->hp<0){
+    if (target->hp < 0)
+    {
         slog("YOU WIN");
         return TRUE;
     }
-    else{
+    else
+    {
         slog("Continue Battle");
         return FALSE;
     }
 }
 
 /// @brief true = end, false = contine
-/// @param ctx 
-/// @param out 
-/// @return 
-int battle(struct nk_context *ctx , char* out)
+/// @param ctx
+/// @param out
+/// @return
+int battle(struct nk_context *ctx, char *out)
 {
     Sprite *playerSprite = gf2d_sprite_load_image("images/demon/4.png");
     Sprite *enemySprite = gf2d_sprite_load_image("images/demon/2.png");
     int cur_time = SDL_GetTicks();
-        if (current_action)
+    if (current_action)
+    {
+        int time = cur_time - press_time;
+        // slog("%i",time);
+
+        if (time > TURN_DELAY * 3)
         {
-            int time =cur_time - press_time;
-            // slog("%i",time);
-            
-            if(time > TURN_DELAY*3)
-            {
-                out ="Next";
-                current_action = NULL;
-            }
-            else if(time > TURN_DELAY*2)
-            {
-                current_action = &Enemy.attacks[0];
-                action_dmg(&Player, *current_action);
-                out = "Player 2 Instance";
-                slog(out);
-                slog("Player Turn: %i", turn_player);
-            }
-            else if (time > TURN_DELAY)
-            {
-                if(action_dmg(&Enemy, *current_action)){
-                    return FALSE;
-                }
-                // current_action = NULL;
-                out = "Player 1 Instance";
-                slog(out);
-                // slog("Player Turn: %i", turn_player);
-                // press_time = SDL_GetTicks();
-            }
+            out = "Next";
+            current_action = NULL;
         }
-        // if(cur_time - attack_timer > ATTACK_DELAY){
-        //     out ="Battle Continues";
-        // }
-        gf2d_sprite_draw_image(playerSprite, vector2d(0, 0));
-        gf2d_sprite_draw_image(enemySprite, vector2d(700, -150));
-        menu_attack(ctx, &Player);
-        menu_enemy(ctx, &Enemy);
-        menu_item(ctx, &inventory);
-        menu_output(ctx, out);
-        nk_sdl_render(NK_ANTI_ALIASING_ON);
-        return FALSE;
+        else if (time > TURN_DELAY * 2)
+        {
+            current_action = &Enemy.attacks[0];
+            action_dmg(&Player, *current_action);
+            out = "Player 2 Instance";
+            slog(out);
+            slog("Player Turn: %i", turn_player);
+        }
+        else if (time > TURN_DELAY)
+        {
+            if (action_dmg(&Enemy, *current_action))
+            {
+                return FALSE;
+            }
+            // current_action = NULL;
+            out = "Player 1 Instance";
+            slog(out);
+            // slog("Player Turn: %i", turn_player);
+            // press_time = SDL_GetTicks();
+        }
+    }
+    // if(cur_time - attack_timer > ATTACK_DELAY){
+    //     out ="Battle Continues";
+    // }
+    gf2d_sprite_draw_image(playerSprite, vector2d(0, 0));
+    gf2d_sprite_draw_image(enemySprite, vector2d(700, -150));
+    menu_attack(ctx, &Player);
+    menu_enemy(ctx, &Enemy);
+    menu_item(ctx, &inventory);
+    menu_output(ctx, out);
+    nk_sdl_render(NK_ANTI_ALIASING_ON);
+    return FALSE;
 }
 /*eol@eof*/
