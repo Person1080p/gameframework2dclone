@@ -27,8 +27,6 @@ typedef struct Action
     int max_dam;
 } Action;
 
-int turn_player;
-
 Action *current_action;
 #define TURN_DELAY 2000
 int press_time;
@@ -37,6 +35,8 @@ int press_time;
 #define FALSE 0
 typedef struct Character
 {
+    Sprite *sprite;
+    char sprite_path[1024];
     char name[50];
     int level;
     int hp;
@@ -61,6 +61,8 @@ Inventory inventory =
 
 Character Player =
     {
+        NULL,
+        "images/demon/4.png",
         "Player_Char",
         1,
         120,
@@ -90,6 +92,8 @@ Character Player =
 
 Character Enemy =
     {
+        NULL,
+        "images/demon/2.png",
         "Pixie",
         1,
         120,
@@ -99,7 +103,7 @@ Character Enemy =
           10,
           15}}};
 
-void menu_output(struct nk_context *ctx, char *out);
+void menu_output(struct nk_context *ctx, char *info_out);
 
 void menu_enemy(struct nk_context *ctx, Character *c);
 
@@ -111,14 +115,34 @@ int action_rng(int max, int min);
 
 int action_dmg(Character *enemyc, Action act);
 
-int battle();
+int battle(struct nk_context *ctx, Character *player, Character *enemy, char *info_out);
 
 int battle_now = 0;
 
+// State names rather than matching the string
+enum
+{
+    HEATED,
+    NEXT,
+    P1_INST,
+    P2_INST,
+    NUM_MESSAGES
+};
+
+char *Messages[] =
+    {
+        "A Heated Battle",
+        "Next",
+        "Player 1 Instance",
+        "Player 2 Instance",
+};
+
+char info_out[1024];
+
 int main(int argc, char *argv[])
 {
-    char *out = "A Heated Battle";
-    turn_player = 0; // now player turn
+    strcpy(info_out, Messages[HEATED]);
+
     /*variable declarations*/
     int done = 0;
     const Uint8 *keys;
@@ -160,6 +184,11 @@ int main(int argc, char *argv[])
     level = level_load("config/test.level");
     level_set_active_level(level);
 
+    // TODO in a loop read in json (or whatever) and load all sprites
+    // arrays of players (if you have more than one player) and enemys
+    Player.sprite = gf2d_sprite_load_image(Player.sprite_path);
+    Enemy.sprite = gf2d_sprite_load_image(Enemy.sprite_path);
+
     exent = gme_entity_new();
     exent->entity_sprite = gf2d_sprite_load_all(
         "images/space_bug.png",
@@ -167,6 +196,8 @@ int main(int argc, char *argv[])
         128,
         16,
         0);
+
+    battle_now = TRUE;
 
     while (!done)
     {
@@ -201,16 +232,13 @@ int main(int argc, char *argv[])
         // contents next
         // UI elements last
 
-        // SDL_asprintf(&out, "Char's %s did %d", current_action->name, (current_action->max_dam, current_action->min_dam));
-        // SDL_asprintf(&out, "Char's %s did Damage", current_action->name);
-        // slog(out);
+        // SDL_asprintf(&info_out, "Char's %s did %d", current_action->name, (current_action->max_dam, current_action->min_dam));
+        // SDL_asprintf(&info_out, "Char's %s did Damage", current_action->name);
+        // slog(info_out);
         // slog("Player Turn: %i", turn_player);
         if (battle_now)
         {
-            if (battle(ctx, out))
-            {
-                battle_now = FALSE;
-            }
+            battle_now = battle(ctx, &Player, &Enemy, info_out);
         }
         else
         {
@@ -234,6 +262,7 @@ int main(int argc, char *argv[])
             //     exent->position.y = 600;
             // if (exent->position.x < 0)
             //     exent->position.x = 0;
+            // battle_now = TRUE;
 
             slog("Bug Pos: %f, %f", exent->position.x, exent->position.y);
 
@@ -270,13 +299,13 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void menu_output(struct nk_context *ctx, char *out)
+void menu_output(struct nk_context *ctx, char *info_out)
 {
     int flags = NK_WINDOW_BORDER | NK_WINDOW_NO_SCROLLBAR;
-    if (nk_begin(ctx, "top 4", nk_rect(600, 500, 200, 80), flags))
+    if (nk_begin(ctx, "top 4", nk_rect(600, 500, 300, 80), flags))
     {
         nk_layout_row_dynamic(ctx, 30, 1);
-        nk_label(ctx, out, NK_TEXT_LEFT);
+        nk_label(ctx, info_out, NK_TEXT_LEFT);
     }
     nk_end(ctx);
 }
@@ -316,8 +345,6 @@ void menu_attack(struct nk_context *ctx, Character *c)
             {
                 if (nk_button_label(ctx, c->attacks[i].name)) // render all buttons, and on button press do if statement
                 {
-                    turn_player = 1; // no more player turn
-                    slog("Player Turn: %i", turn_player);
                     current_action = &c->attacks[i];
                     press_time = SDL_GetTicks();
                 }
@@ -347,7 +374,7 @@ void menu_item(struct nk_context *ctx, Inventory *in)
     nk_end(ctx);
 }
 
-int action_rng(int max, int min)
+int action_rng(int min, int max)
 {
     return rand() % (max - min) + min;
 }
@@ -357,13 +384,16 @@ int action_rng(int max, int min)
 /// @return
 int action_dmg(Character *target, Action act)
 {
-    int damage = action_rng(act.max_dam, act.min_dam);
-    slog("SPELL DID THIS %i", damage);
+    int damage = action_rng(act.min_dam, act.max_dam);
+    slog("%s DID THIS %i", act.name, damage);
     target->hp -= damage;
     slog("ENEMY HP%i", target->hp);
-    if (target->hp < 0)
+
+    snprintf(info_out, 1024, "%s just took %d damage", target->name, damage);
+
+    if (target->hp <= 0)
     {
-        slog("YOU WIN");
+        slog("%s has died", target->name);
         return TRUE;
     }
     else
@@ -375,54 +405,52 @@ int action_dmg(Character *target, Action act)
 
 /// @brief true = end, false = contine
 /// @param ctx
-/// @param out
+/// @param info_out
 /// @return
-int battle(struct nk_context *ctx, char *out)
+int battle(struct nk_context *ctx, Character *player, Character *enemy, char *info_out)
 {
-    Sprite *playerSprite = gf2d_sprite_load_image("images/demon/4.png");
-    Sprite *enemySprite = gf2d_sprite_load_image("images/demon/2.png");
+    static int whois_target = 0;
+
+    // player goes first, meaning target is 0 enemy
+    Character *players[] = {enemy, player};
+
     int cur_time = SDL_GetTicks();
+    int time = cur_time - press_time;
     if (current_action)
     {
-        int time = cur_time - press_time;
-        // slog("%i",time);
-
-        if (time > TURN_DELAY * 3)
+        // if you kill them
+        if (action_dmg(players[whois_target], *current_action))
         {
-            out = "Next";
+            whois_target = 0;
             current_action = NULL;
+            return FALSE; // return false to end battle
         }
-        else if (time > TURN_DELAY * 2)
+
+        whois_target = !whois_target;
+        current_action = NULL;
+
+        slog(info_out);
+        press_time = cur_time;
+    }
+    else if (time > TURN_DELAY)
+    {
+        // if player is target, choose enemy attack
+        if (whois_target)
         {
-            current_action = &Enemy.attacks[0];
-            action_dmg(&Player, *current_action);
-            out = "Player 2 Instance";
-            slog(out);
-            slog("Player Turn: %i", turn_player);
+            current_action = &enemy->attacks[0]; // chose randomly
         }
-        else if (time > TURN_DELAY)
+        else
         {
-            if (action_dmg(&Enemy, *current_action))
-            {
-                return FALSE;
-            }
-            // current_action = NULL;
-            out = "Player 1 Instance";
-            slog(out);
-            // slog("Player Turn: %i", turn_player);
-            // press_time = SDL_GetTicks();
+            snprintf(info_out, 1024, "%s pick a new attack", player->name);
         }
     }
-    // if(cur_time - attack_timer > ATTACK_DELAY){
-    //     out ="Battle Continues";
-    // }
-    gf2d_sprite_draw_image(playerSprite, vector2d(0, 0));
-    gf2d_sprite_draw_image(enemySprite, vector2d(700, -150));
-    menu_attack(ctx, &Player);
-    menu_enemy(ctx, &Enemy);
+    gf2d_sprite_draw_image(player->sprite, vector2d(0, 0));
+    gf2d_sprite_draw_image(enemy->sprite, vector2d(700, -150));
+    menu_attack(ctx, player);
+    menu_enemy(ctx, enemy);
     menu_item(ctx, &inventory);
-    menu_output(ctx, out);
+    menu_output(ctx, info_out);
     nk_sdl_render(NK_ANTI_ALIASING_ON);
-    return FALSE;
+    return TRUE;
 }
 /*eol@eof*/
