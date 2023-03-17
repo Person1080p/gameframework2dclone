@@ -8,6 +8,8 @@
 #include "level.h"
 #include "camera.h"
 
+#include "battle.h"
+
 #include "gme_entity.h"
 
 enum
@@ -19,13 +21,7 @@ enum
 
 int fullscreen_gui;
 
-/// @brief Used for Both Abilities and Damage
-typedef struct Action
-{
-    char name[20];
-    int min_dam;
-    int max_dam;
-} Action;
+
 
 Action *current_action;
 #define TURN_DELAY 2000
@@ -33,24 +29,7 @@ int press_time;
 
 #define TRUE 1
 #define FALSE 0
-typedef struct Character
-{
-    Sprite *sprite;
-    char sprite_path[1024];
-    char name[50];
-    int level;
-    int hp;
-    int max_hp;
-    int n_attacks;
-    Action attacks[7];
-} Character;
 
-typedef struct Inventory
-{
-    int num_item;
-    Action item[20];
-    // add item amounts
-} Inventory;
 
 Inventory inventory =
     {
@@ -103,19 +82,7 @@ Character Enemy =
           10,
           15}}};
 
-void menu_output(struct nk_context *ctx, char *info_out);
 
-void menu_enemy(struct nk_context *ctx, Character *c);
-
-void menu_attack(struct nk_context *ctx, Character *c);
-
-void menu_item(struct nk_context *ctx, Inventory *i);
-
-int action_rng(int max, int min);
-
-int action_dmg(Character *enemyc, Action act);
-
-int battle(struct nk_context *ctx, Character *player, Character *enemy, char *info_out);
 
 int battle_now = 0;
 
@@ -236,9 +203,13 @@ int main(int argc, char *argv[])
         // SDL_asprintf(&info_out, "Char's %s did Damage", current_action->name);
         // slog(info_out);
         // slog("Player Turn: %i", turn_player);
+        if(keys[SDL_SCANCODE_P]){
+            battle_now =1;
+            Enemy.hp = Enemy.max_hp;
+        }
         if (battle_now)
         {
-            battle_now = battle(ctx, &Player, &Enemy, info_out);
+            battle_now = battle_battle(ctx, &Player, &Enemy, info_out);
         }
         else
         {
@@ -299,7 +270,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void menu_output(struct nk_context *ctx, char *info_out)
+void battle_menu_output(struct nk_context *ctx, char *info_out)
 {
     int flags = NK_WINDOW_BORDER | NK_WINDOW_NO_SCROLLBAR;
     if (nk_begin(ctx, "top 4", nk_rect(600, 500, 300, 80), flags))
@@ -310,7 +281,7 @@ void menu_output(struct nk_context *ctx, char *info_out)
     nk_end(ctx);
 }
 
-void menu_enemy(struct nk_context *ctx, Character *c)
+void battle_menu_enemy(struct nk_context *ctx, Character *c)
 {
     char *enemy_status;
     SDL_asprintf(&enemy_status, "ENEMY Level %i | HP: %i/%i", c->level, c->hp, c->max_hp);
@@ -326,7 +297,7 @@ void menu_enemy(struct nk_context *ctx, Character *c)
     nk_end(ctx);
 }
 
-void menu_attack(struct nk_context *ctx, Character *c)
+void battle_menu_attack(struct nk_context *ctx, Character *c)
 {
     int flags = NK_WINDOW_BORDER;
     if (nk_begin(ctx, "top 1", nk_rect(10, 500, 200, 200), flags))
@@ -353,7 +324,7 @@ void menu_attack(struct nk_context *ctx, Character *c)
     }
     nk_end(ctx);
 }
-void menu_item(struct nk_context *ctx, Inventory *in)
+void battle_menu_item(struct nk_context *ctx, Inventory *in)
 {
     int flags = NK_WINDOW_BORDER;
     if (nk_begin(ctx, "top 2", nk_rect(300, 500, 200, 200), flags))
@@ -374,7 +345,7 @@ void menu_item(struct nk_context *ctx, Inventory *in)
     nk_end(ctx);
 }
 
-int action_rng(int min, int max)
+int battle_action_rng(int min, int max)
 {
     return rand() % (max - min) + min;
 }
@@ -382,9 +353,9 @@ int action_rng(int min, int max)
 /// @param target
 /// @param act
 /// @return
-int action_dmg(Character *target, Action act)
+int battle_action_dmg(Character *target, Action act)
 {
-    int damage = action_rng(act.min_dam, act.max_dam);
+    int damage = battle_action_rng(act.min_dam, act.max_dam);
     slog("%s DID THIS %i", act.name, damage);
     target->hp -= damage;
     slog("ENEMY HP%i", target->hp);
@@ -407,7 +378,7 @@ int action_dmg(Character *target, Action act)
 /// @param ctx
 /// @param info_out
 /// @return
-int battle(struct nk_context *ctx, Character *player, Character *enemy, char *info_out)
+int battle_battle(struct nk_context *ctx, Character *player, Character *enemy, char *info_out)
 {
     static int whois_target = 0;
 
@@ -419,7 +390,7 @@ int battle(struct nk_context *ctx, Character *player, Character *enemy, char *in
     if (current_action)
     {
         // if you kill them
-        if (action_dmg(players[whois_target], *current_action))
+        if (battle_action_dmg(players[whois_target], *current_action))
         {
             whois_target = 0;
             current_action = NULL;
@@ -446,10 +417,10 @@ int battle(struct nk_context *ctx, Character *player, Character *enemy, char *in
     }
     gf2d_sprite_draw_image(player->sprite, vector2d(0, 0));
     gf2d_sprite_draw_image(enemy->sprite, vector2d(700, -150));
-    menu_attack(ctx, player);
-    menu_enemy(ctx, enemy);
-    menu_item(ctx, &inventory);
-    menu_output(ctx, info_out);
+    battle_menu_attack(ctx, player);
+    battle_menu_enemy(ctx, enemy);
+    battle_menu_item(ctx, &inventory);
+    battle_menu_output(ctx, info_out);
     nk_sdl_render(NK_ANTI_ALIASING_ON);
     return TRUE;
 }
