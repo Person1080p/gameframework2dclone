@@ -44,7 +44,7 @@ int battle_action_rng(int max, int min);
 
 int battle_action_dmg(Character *enemyc, Action act);
 
-int battle_battle(struct nk_context *ctx, Character *player, Character *enemy, char *info_out);
+int battle_battle(struct nk_context *ctx, Character *player, Character *enemy, Inventory *inventory);
 
 
 #endif
