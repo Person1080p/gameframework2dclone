@@ -1,4 +1,5 @@
 #include "simple_logger.h"
+#include "simple_json.h"
 #include "gf2d_graphics.h"
 #include "battle.h"
 
@@ -27,7 +28,6 @@ char *Messages[] =
         "Player 1 Instance",
         "Player 2 Instance",
 };
-
 
 void battle_menu_output(struct nk_context *ctx, char *info_out)
 {
@@ -183,7 +183,35 @@ int battle_battle(struct nk_context *ctx, Character *player, Character *enemy, I
     nk_sdl_render(NK_ANTI_ALIASING_ON);
     return TRUE;
 }
-// Character battle_load_character(char* )
-// {
+Character battle_load_character(char *name)
+{
+    SJson *json, *lj;
+    Character charJson;
+    char path[512];
+    // char* name = "player";
+    strcpy(path, "config/");
+    strcat(path, name);
+    strcat(path, ".json");
+    json = sj_load(path);
+    lj = sj_object_get_value(json, "character");
 
-// }
+    charJson.sprite = NULL;
+    strcpy(charJson.sprite_path, sj_object_get_value_as_string(lj, "sprite_path"));
+    strcpy(charJson.name, sj_object_get_value_as_string(lj, "name"));
+    sj_object_get_value_as_int(lj, "level", &charJson.level);
+    sj_object_get_value_as_int(lj, "hp", &charJson.hp);
+    sj_object_get_value_as_int(lj, "max_hp", &charJson.max_hp);
+    sj_object_get_value_as_int(lj, "n_attacks", &charJson.n_attacks);
+    SJson *attackJson = sj_object_get_value(lj, "attacks");
+    for (int i = 0; i < charJson.n_attacks; i++)
+    {
+        SJson *jattack = sj_array_get_nth(attackJson, i);
+
+        strcpy(charJson.attacks[i].name, sj_object_get_value_as_string(jattack, "name"));
+        sj_object_get_value_as_int(jattack, "min_dam", &charJson.attacks[i].min_dam);
+        sj_object_get_value_as_int(jattack, "max_dam", &charJson.attacks[i].max_dam);
+    }
+    return charJson;
+    // slog(charJson.attacks[6].name);
+    // slog("%i",testJson.attacks[0].min_dam);
+}

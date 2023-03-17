@@ -1,0 +1,18 @@
+{
+    "character": {
+        "sprite": 0,
+        "sprite_path": "images/demon/3.png",
+        "name": "Fairy",
+        "level": 3,
+        "hp": 60,
+        "max_hp": 60,
+        "n_attacks": 1,
+        "attacks": [
+            {
+                "name": "Hit",
+                "min_dam": 5,
+                "max_dam": 30
+            }
+        ]
+    }
+}

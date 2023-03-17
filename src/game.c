@@ -13,7 +13,6 @@
 
 #include "battle.h"
 
-
 enum
 {
     DELAY,
@@ -33,88 +32,17 @@ Inventory inventory =
 
 };
 
-Character Player =
-    {
-        NULL,
-        "images/demon/4.png",
-        "Player_Char",
-        1,
-        120,
-        120,
-        7,
-        {{"Tackle",
-          10,
-          15},
-         {"Fire",
-          130,
-          330},
-         {"Fire2",
-          10,
-          30},
-         {"Fire3",
-          10,
-          30},
-         {"Fire4",
-          10,
-          30},
-         {"Fire5",
-          10,
-          30},
-         {"Fire6",
-          10,
-          30}}};
-
-Character Enemy =
-    {
-        NULL,
-        "images/demon/2.png",
-        "Pixie",
-        1,
-        120,
-        120,
-        7,
-        {{"Tackle",
-          10,
-          15}}};
-
-int battle_now = 0;
-
-// State names rather than matching the string
-
 int main(int argc, char *argv[])
 {
-    SJson *json,*lj;
-    Character testJson;
-    char path[512];
-    char* name = "player";
-    strcpy(path, "config/");
-    strcat(path, name);
-    strcat(path, ".json");
-    json = sj_load(path);
-    lj = sj_object_get_value(json,"character");
+    Character Player = battle_load_character("player");
+    Character Enemy = battle_load_character("enemy0");
 
-    testJson.sprite = NULL;
-    strcpy(testJson.sprite_path, sj_object_get_value_as_string(lj,"sprite_path"));
-    strcpy(testJson.name, sj_object_get_value_as_string(lj,"name"));
-    sj_object_get_value_as_int(lj,"level", &testJson.level);
-    sj_object_get_value_as_int(lj,"hp", &testJson.hp);
-    sj_object_get_value_as_int(lj,"max_hp", &testJson.max_hp);
-    sj_object_get_value_as_int(lj,"n_attacks", &testJson.n_attacks);
-    SJson *attackJson = sj_object_get_value(lj,"attacks");
-    for(int i=0; i<testJson.n_attacks; i++){
-        SJson *jattack = sj_array_get_nth(attackJson,i);
-
-        strcpy(testJson.attacks[i].name, sj_object_get_value_as_string(jattack,"name"));
-        sj_object_get_value_as_int(jattack,"min_dam", &testJson.attacks[i].min_dam);
-        sj_object_get_value_as_int(jattack,"max_dam", &testJson.attacks[i].max_dam);
-
-    }
-
-    slog(testJson.attacks[6].name);
-    // slog("%i",testJson.attacks[0].min_dam);
+    slog(Player.attacks[6].name);
 
     /*variable declarations*/
     int done = 0;
+    int battle_now = 0;
+    int pause = 0;
     const Uint8 *keys;
     Sprite *background;
     Level *level;
@@ -168,7 +96,6 @@ int main(int argc, char *argv[])
         0);
 
     battle_now = TRUE;
-
     while (!done)
     {
 
@@ -265,8 +192,18 @@ int main(int argc, char *argv[])
         // camera_center_at(mousep);
         // slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
         // slog("Mouse at %i , %i",mx,my);
-        if (keys[SDL_SCANCODE_ESCAPE])
+        if ((pause ==0) && (keys[SDL_SCANCODE_ESCAPE]))
+        {
+            // pause = 1;
             done = 1; // exit condition
+            slog("%i",pause);
+        }
+        // if(pause == 1)
+        // {
+        //     if ((keys[SDL_SCANCODE_ESCAPE]))
+        //         pause = 0;
+        //     slog("%i",pause);
+        // }
     }
     level_free(level);
     nk_sdl_shutdown();

@@ -29,12 +29,12 @@ Once each submodule has been made you can go into the base project src folder an
 
 You should now have a `gf2d` binary within the root of your git repository. Executing this will start your game.
 
-# Comon Deliverables
+# Common Deliverables
 - Functioning Entity System <!---Done-->
 - Fully interact-able environment
-- User Interface (HUD, Stats, Messages, menus) <!---Done-->
+- User Interface (HUD, Stats, Messages, menus)
 - File read / write access (high score list, saved games, saved songs, etc)
-- README for how to play and see all game features (this should be in the git repo)
+- README for how to play and see all game features (this should be in the git repo) <!---Done-->
 
 # Assigned Deliverables
 - Turn Based Combat System <!---Done-->

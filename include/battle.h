@@ -12,7 +12,6 @@ typedef struct Action
     int max_dam;
 } Action;
 
-
 typedef struct Character
 {
     Sprite *sprite;
@@ -46,5 +45,6 @@ int battle_action_dmg(Character *enemyc, Action act);
 
 int battle_battle(struct nk_context *ctx, Character *player, Character *enemy, Inventory *inventory);
 
+Character battle_load_character(char *name);
 
 #endif

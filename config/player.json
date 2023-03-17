@@ -1,7 +1,7 @@
 {
     "character": {
         "sprite": 0,
-        "sprite_path": "images/demon/4.png",
+        "sprite_path": "images/demon/1.png",
         "name": "Player2",
         "level": 1,
         "hp": 120,
