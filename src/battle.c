@@ -185,15 +185,13 @@ int battle_battle(struct nk_context *ctx, Character *player, Character *enemy, I
 }
 Character battle_load_character(char *name)
 {
-    SJson *json, *lj;
+    SJson *lj;
     Character charJson;
     char path[512];
-    // char* name = "player";
     strcpy(path, "config/");
     strcat(path, name);
-    strcat(path, ".json");
-    json = sj_load(path);
-    lj = sj_object_get_value(json, "character");
+    // strcat(path, ".json");
+    lj = sj_load(path);
 
     charJson.sprite = NULL;
     strcpy(charJson.sprite_path, sj_object_get_value_as_string(lj, "sprite_path"));
@@ -215,9 +213,21 @@ Character battle_load_character(char *name)
     // slog(charJson.attacks[6].name);
     // slog("%i",testJson.attacks[0].min_dam);
 }
-void testwrite()
+
+Character battle_random_enemy(){
+    int upper = 2;
+    int lower = 1;
+    int num = (rand() %(upper - lower + 1)) + lower;
+}
+
+
+//TODO still 1/2 broken, gotta fix
+void battle_save_data_character(char *ipath, Character *chr_save)
 {
-    SJson* source = sj_load("config/player.json");
+    char path[512];
+    strcpy(path, "config/");
+    strcat(path, ipath);
+    SJson* source = sj_load(path);
     SJson* charjson = sj_object_get_value(source, "character");
     SJson* dest = sj_copy(source);
     sj_object_delete_key(dest,"character");

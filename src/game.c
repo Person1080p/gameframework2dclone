@@ -10,7 +10,9 @@
 #include "camera.h"
 
 #include "entity.h"
+#include "space_bug.h"
 
+#include "world.h"
 #include "battle.h"
 
 enum
@@ -34,9 +36,9 @@ Inventory inventory =
 
 int main(int argc, char *argv[])
 {
-    testwrite();
-    Character Player = battle_load_character("player");
-    Character Enemy = battle_load_character("enemy0");
+    Character Player = battle_load_character("player_data/player.json");
+    Character Enemy = battle_load_character("default_enemy/enemy0.json");
+    battle_save_data_character("player_data/player.json", &Player);
 
     slog(Player.attacks[6].name);
 
@@ -45,7 +47,6 @@ int main(int argc, char *argv[])
     Level *level;
     const Uint8 *keys;
     Entity *ent;
-
 
     int pause = 0;
     Sprite *background;
@@ -82,14 +83,12 @@ int main(int argc, char *argv[])
     /*demo setup*/
     background = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
     mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
-    ent = space_bug_new(vector2d(100,100));
+    ent = space_bug_new(vector2d(100, 100));
     level = level_load("config/test.level");
     level_set_active_level(level);
 
     // TODO in a loop read in json (or whatever) and load all sprites
     // arrays of players (if you have more than one player) and enemys
-    Player.sprite = gf2d_sprite_load_image(Player.sprite_path);
-    Enemy.sprite = gf2d_sprite_load_image(Enemy.sprite_path);
 
     // exent = entity_new();
     // exent->sprite = gf2d_sprite_load_all(
@@ -146,6 +145,8 @@ int main(int argc, char *argv[])
         }
         if (battle_now)
         {
+            Player.sprite = gf2d_sprite_load_image(Player.sprite_path);
+            Enemy.sprite = gf2d_sprite_load_image(Enemy.sprite_path);
             battle_now = battle_battle(ctx, &Player, &Enemy, &inventory);
         }
         else
@@ -170,11 +171,11 @@ int main(int argc, char *argv[])
         // camera_center_at(mousep);
         // slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
         // slog("Mouse at %i , %i",mx,my);
-        if ((pause ==0) && (keys[SDL_SCANCODE_ESCAPE]))
+        if ((pause == 0) && (keys[SDL_SCANCODE_ESCAPE]))
         {
             // pause = 1;
             done = 1; // exit condition
-            slog("%i",pause);
+            slog("%i", pause);
         }
         // if(pause == 1)
         // {

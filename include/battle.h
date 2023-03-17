@@ -45,8 +45,13 @@ int battle_action_dmg(Character *enemyc, Action act);
 
 int battle_battle(struct nk_context *ctx, Character *player, Character *enemy, Inventory *inventory);
 
+/// @brief loads a character (enemy or ally) from a json file
+/// @param name path to character json relative to config folder
+/// @return loaded character object
 Character battle_load_character(char *name);
 
-void testwrite();
+Character battle_random_enemy();
+
+void battle_save_data_character(char *ipath, Character *chr_save);
 
 #endif
