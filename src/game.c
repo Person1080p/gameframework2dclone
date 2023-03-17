@@ -2,15 +2,17 @@
 #define NK_IMPLEMENTATION
 #define NK_SDL_RENDERER_IMPLEMENTATION
 #include "simple_logger.h"
+#include "simple_json.h"
 #include "gf2d_graphics.h"
 #include "gf2d_sprite.h"
 
 #include "level.h"
 #include "camera.h"
 
+#include "gme_entity.h"
+
 #include "battle.h"
 
-#include "gme_entity.h"
 
 enum
 {
@@ -21,13 +23,8 @@ enum
 
 int fullscreen_gui;
 
-
-
-
-
 #define TRUE 1
 #define FALSE 0
-
 
 Inventory inventory =
     {
@@ -80,17 +77,42 @@ Character Enemy =
           10,
           15}}};
 
-
-
 int battle_now = 0;
 
 // State names rather than matching the string
 
-
-
 int main(int argc, char *argv[])
 {
-    
+    SJson *json,*lj;
+    Character testJson;
+    char path[512];
+    char* name = "player";
+    strcpy(path, "config/");
+    strcat(path, name);
+    strcat(path, ".json");
+    json = sj_load(path);
+    lj = sj_object_get_value(json,"character");
+
+    testJson.sprite = NULL;
+    strcpy(testJson.sprite_path, sj_object_get_value_as_string(lj,"sprite_path"));
+    strcpy(testJson.name, sj_object_get_value_as_string(lj,"name"));
+    sj_object_get_value_as_int(lj,"level", &testJson.level);
+    sj_object_get_value_as_int(lj,"hp", &testJson.hp);
+    sj_object_get_value_as_int(lj,"max_hp", &testJson.max_hp);
+    sj_object_get_value_as_int(lj,"n_attacks", &testJson.n_attacks);
+    SJson *attackJson = sj_object_get_value(lj,"attacks");
+    for(int i=0; i<testJson.n_attacks; i++){
+        SJson *jattack = sj_array_get_nth(attackJson,i);
+
+        strcpy(testJson.attacks[i].name, sj_object_get_value_as_string(jattack,"name"));
+        sj_object_get_value_as_int(jattack,"min_dam", &testJson.attacks[i].min_dam);
+        sj_object_get_value_as_int(jattack,"max_dam", &testJson.attacks[i].max_dam);
+
+    }
+
+    slog(testJson.attacks[6].name);
+    // slog("%i",testJson.attacks[0].min_dam);
+
     /*variable declarations*/
     int done = 0;
     const Uint8 *keys;
@@ -184,8 +206,9 @@ int main(int argc, char *argv[])
         // SDL_asprintf(&info_out, "Char's %s did Damage", current_action->name);
         // slog(info_out);
         // slog("Player Turn: %i", turn_player);
-        if(keys[SDL_SCANCODE_P]){
-            battle_now =1;
+        if (keys[SDL_SCANCODE_P])
+        {
+            battle_now = 1;
             Enemy.hp = Enemy.max_hp;
         }
         if (battle_now)
@@ -250,6 +273,5 @@ int main(int argc, char *argv[])
     slog("---==== END ====---");
     return 0;
 }
-
 
 /*eol@eof*/

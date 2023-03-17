@@ -28,3 +28,19 @@ Once each submodule has been made you can go into the base project src folder an
 `make`
 
 You should now have a `gf2d` binary within the root of your git repository. Executing this will start your game.
+
+# Comon Deliverables
+- Functioning Entity System <!---Done-->
+- Fully interact-able environment
+- User Interface (HUD, Stats, Messages, menus) <!---Done-->
+- File read / write access (high score list, saved games, saved songs, etc)
+- README for how to play and see all game features (this should be in the git repo)
+
+# Assigned Deliverables
+- Turn Based Combat System <!---Done-->
+- 10 recrutibale monsters
+- Player Upgrade System (working)
+- Tile based world that is randomly generated
+- 5 In-world Interactables (NPC's, Chests, etc.)
+
+<!---3/10-->

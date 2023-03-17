@@ -183,3 +183,7 @@ int battle_battle(struct nk_context *ctx, Character *player, Character *enemy, I
     nk_sdl_render(NK_ANTI_ALIASING_ON);
     return TRUE;
 }
+// Character battle_load_character(char* )
+// {
+
+// }
