@@ -9,7 +9,7 @@
 #include "level.h"
 #include "camera.h"
 
-#include "gme_entity.h"
+#include "entity.h"
 
 #include "battle.h"
 
@@ -42,14 +42,17 @@ int main(int argc, char *argv[])
 
     /*variable declarations*/
     int done = 0;
-    int battle_now = 0;
-    int pause = 0;
-    const Uint8 *keys;
-    Sprite *background;
     Level *level;
-    Entity *exent;
+    const Uint8 *keys;
+    Entity *ent;
+
+
+    int pause = 0;
+    Sprite *background;
     // gme_entity_init(1024);
-    gme_entity_manager_init(1024);
+    entity_manager_init(1024);
+
+    int battle_now = 0;
 
     /*mouse vars*/
     int mx, my;
@@ -79,7 +82,7 @@ int main(int argc, char *argv[])
     /*demo setup*/
     background = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
     mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
-
+    ent = space_bug_new(vector2d(100,100));
     level = level_load("config/test.level");
     level_set_active_level(level);
 
@@ -88,13 +91,13 @@ int main(int argc, char *argv[])
     Player.sprite = gf2d_sprite_load_image(Player.sprite_path);
     Enemy.sprite = gf2d_sprite_load_image(Enemy.sprite_path);
 
-    exent = gme_entity_new();
-    exent->entity_sprite = gf2d_sprite_load_all(
-        "images/space_bug.png",
-        128,
-        128,
-        16,
-        0);
+    // exent = entity_new();
+    // exent->sprite = gf2d_sprite_load_all(
+    //     "images/space_bug.png",
+    //     128,
+    //     128,
+    //     16,
+    //     0);
 
     battle_now = TRUE;
     while (!done)
@@ -121,7 +124,9 @@ int main(int argc, char *argv[])
         if (mf >= 16.0)
             mf = 0;
         //
-
+        entity_think_all();
+        entity_update_all();
+        camera_world_snap();
         //
         gf2d_graphics_clear_screen(); // clears drawing buffers
                                       // all drawing should happen betweem clear_screen and next_frame
@@ -145,36 +150,8 @@ int main(int argc, char *argv[])
         }
         else
         {
-            gme_entity_animate(exent, 0, 16.0);
-            // exent->position = vector2d(mf*10+mf,mf*10+mf);
-            float speed = 10;
-            if (keys[SDL_SCANCODE_W])
-                exent->position = vector2d(exent->position.x, exent->position.y - speed);
-            if (keys[SDL_SCANCODE_S])
-                exent->position = vector2d(exent->position.x, exent->position.y + speed);
-            if (keys[SDL_SCANCODE_A])
-                exent->position = vector2d(exent->position.x - speed, exent->position.y);
-            if (keys[SDL_SCANCODE_D])
-                exent->position = vector2d(exent->position.x + speed, exent->position.y);
-
-            // if (exent->position.y < 0)
-            //     exent->position.y = 0;
-            // if (exent->position.x > 1080)
-            //     exent->position.x = 1080;
-            // if (exent->position.y > 600)
-            //     exent->position.y = 600;
-            // if (exent->position.x < 0)
-            //     exent->position.x = 0;
-            // battle_now = TRUE;
-
-            slog("Bug Pos: %f, %f", exent->position.x, exent->position.y);
-
-            // start->position=vector2d(mx,my);
-            // gme_entity_animate(exent, 1, 16.0);
             level_draw(level_get_active_level());
-            gme_entity_draw_all();
-            gme_entity_think(exent);
-            // Vector2D mousep = vector2d(mx,my);
+            entity_draw_all();
             camera_world_snap();
         }
 
@@ -208,6 +185,7 @@ int main(int argc, char *argv[])
     }
     level_free(level);
     nk_sdl_shutdown();
+    entity_free(ent);
     slog("---==== END ====---");
     return 0;
 }

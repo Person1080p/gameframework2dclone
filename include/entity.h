@@ -3,19 +3,20 @@
 
 #include "gfc_types.h"
 #include "gfc_vector.h"
+#include "gfc_shape.h"
 
 #include "gf2d_sprite.h"
-#include "camera.h"
 
 typedef struct Entity_S
 {
-    Bool    _entity_inuse;
-    Sprite *entity_sprite;
-    float   entity_frame;
-    float   entity_rotation;
-    float   entity_speed;
-    Vector2D entity_drawOffset;
+    Bool    _inuse;
+    Sprite *sprite;
+    float   frame;
+    float   rotation;
+    float   speed;
+    Vector2D drawOffset;
     
+    Shape shape;    //collision shape
     
     Vector2D position;
     Vector2D velocity;
@@ -33,47 +34,55 @@ typedef struct Entity_S
  * @note this will automatically queue up the close function for program exit
  * @param max this is the maximum number of supported entities at a given time
  */
-void gme_entity_manager_init(Uint32 max);
+void entity_manager_init(Uint32 max);
 
 /**
  * @brief alloate an initialize a new entity
  * @return NULL if there are no entities left, an empty entity otherwise
  */
-Entity *gme_entity_new();
+Entity *entity_new();
 
 /**
  * @brief free a previously allocated entity
  * @param ent the entity to free
  */
-void gme_entity_free(Entity *ent);
+void entity_free(Entity *ent);
 
 /**
  * @brief free all allocated entities
  */
-void gme_entity_free_all();
+void entity_free_all();
 
 /**
  * @brief draw all active entities if they have graphics
  */
-void gme_entity_draw_all();
+void entity_draw_all();
 
 /**
  * @brief update all active entities
  */
-void gme_entity_update_all();
+void entity_update_all();
 
 /**
  * @brief call all the think functions for the entities, if they have one
  */
-void gme_entity_think_all();
+void entity_think_all();
 
-/// @brief continues animation for entity
-/// @param ent entity pointer
-/// @param frame_start start pos of animation
-/// @param frame_final max value of animation
-void gme_entity_animate(Entity *ent, float frame_start, float frame_final);
+/**
+ * @brief given an entity get its shape in world space
+ * @param ent the entity to check
+ * @return a shape where its position is set to the world position
+ */
+Shape entity_get_shape(Entity *ent);
 
-void gme_entity_think(Entity *self);
+/**
+ * @brief given an entity get its shape in world space where it will be after it moves
+ * @param ent the entity to check
+ * @return a shape where its position + velocity is set to the world position
+ */
+Shape entity_get_shape_after_move(Entity *ent);
+
+void entity_animate(Entity *ent, float frame_start, float frame_final);
 
 
 #endif
