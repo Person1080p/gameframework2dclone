@@ -34,6 +34,7 @@ Inventory inventory =
 
 int main(int argc, char *argv[])
 {
+    testwrite();
     Character Player = battle_load_character("player");
     Character Enemy = battle_load_character("enemy0");
 

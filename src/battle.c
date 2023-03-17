@@ -215,3 +215,18 @@ Character battle_load_character(char *name)
     // slog(charJson.attacks[6].name);
     // slog("%i",testJson.attacks[0].min_dam);
 }
+void testwrite()
+{
+    SJson* source = sj_load("config/player.json");
+    SJson* charjson = sj_object_get_value(source, "character");
+    SJson* dest = sj_copy(source);
+    sj_object_delete_key(dest,"character");
+    SJson* num;
+
+    num = sj_new_int(234);
+    sj_object_delete_key(charjson,"level");
+    sj_object_insert(charjson,"level", num);
+    sj_object_insert(dest,"character", charjson);
+
+    sj_save(dest, "config/test.json");
+}

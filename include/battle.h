@@ -47,4 +47,6 @@ int battle_battle(struct nk_context *ctx, Character *player, Character *enemy, I
 
 Character battle_load_character(char *name);
 
+void testwrite();
+
 #endif
