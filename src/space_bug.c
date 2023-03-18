@@ -12,13 +12,13 @@ Entity *space_bug_new(Vector2D position)
     ent = entity_new();
     if (!ent)return NULL;
     ent->sprite = gf2d_sprite_load_all(
-        "images/player_world.png",
-        128,
-        128,
+        "images/world_player.png",
+        87,
+        122,
         16,
         0);
     ent->think = space_bug_think;
-    ent->shape = gfc_shape_circle(0,0, 10);// shape position becomes offset from entity position, in this case zero
+    ent->shape = gfc_shape_circle(0,0, 30);// shape position becomes offset from entity position, in this case zero
     vector2d_copy(ent->position,position);
     ent->drawOffset = vector2d(64,74);
     ent->speed = 2.5;

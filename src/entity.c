@@ -117,11 +117,14 @@ void entity_update(Entity *ent)
         //our next position is a hit, so don't move
         return;
     }
-    // if (level_shape_clip(g->chests,entity_get_shape_after_move(ent) ))//HITS A CHEST
-    // {
-    //     //our next position is a hit, so don't move
-    //     return;
-    // }
+    if (level_shape_clip(level_get_active_chest(),entity_get_shape_after_move(ent) ))//HITS A CHEST
+    {
+        //our next position is a hit, so don't move
+        Vector2D pos = vector2d(300, 300);
+        ent->position = pos;
+        slog("HIT A CHEST, GOT A NEW PARTY MEMEBER");
+        return;
+    }
     vector2d_add(ent->position,ent->position,ent->velocity);
     if(vector2d_magnitude_compare(ent->velocity,0) != 0)
     {

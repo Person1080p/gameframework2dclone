@@ -10,7 +10,6 @@
 #include "entity.h"
 #include "space_bug.h"
 
-#include "world.h"
 #include "battle.h"
 
 #include "globals.h"
@@ -34,6 +33,7 @@ int main(int argc, char *argv[])
     /*variable declarations*/
     int done = 0;
     Level *level;
+    Level *chests;
     const Uint8 *keys;
     Entity *ent;
 
@@ -74,7 +74,9 @@ int main(int argc, char *argv[])
     ent = space_bug_new(vector2d(100, 100));
     level = level_load("config/test.level");
     level_set_active_level(level);
-    // g->chests = level_load("config/chest.level");
+    
+    chests = level_load("config/chest.level");
+    level_set_active_chest(chests);
 
     Character Player = battle_load_character("player_data/player.json");
     monst_inst player_i = { &Player, Player.max_hp };
@@ -178,7 +180,7 @@ int main(int argc, char *argv[])
         else
         {
             level_draw(level_get_active_level());
-            // level_draw(g->chests);
+            level_draw(chests);
             entity_draw_all();
             camera_world_snap();
         }
@@ -212,7 +214,7 @@ int main(int argc, char *argv[])
         // }
     }
     level_free(level);
-    // level_free(g->chests);
+    level_free(chests);
     nk_sdl_shutdown();
     entity_free(ent);
     slog("---==== END ====---");

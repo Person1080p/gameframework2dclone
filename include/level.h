@@ -68,4 +68,7 @@ Level *level_new();
  */
 void level_free(Level *level);
 
+Level *level_get_active_chest();
+void level_set_active_chest(Level *level);
+
 #endif

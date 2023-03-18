@@ -31,7 +31,7 @@ You should now have a `gf2d` binary within the root of your git repository. Exec
 
 # Common Deliverables
 - Functioning Entity System <!---Done-->
-- Fully interact-able environment
+- Fully interact-able environment <!---Done-->
 - User Interface (HUD, Stats, Messages, menus) <!---Done-->
 - File read / write access (high score list, saved games, saved songs, etc)
 - README for how to play and see all game features (this should be in the git repo) <!---Done-->
