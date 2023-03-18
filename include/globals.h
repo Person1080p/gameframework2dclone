@@ -22,6 +22,7 @@ enum { MAP, BATTLE };
 enum { PLAYER_TURN, ENEMY_TURN };
 
 #include "battle.h"
+#include "level.h"
 typedef struct global_state
 {
     struct nk_context *ctx;
@@ -46,7 +47,7 @@ typedef struct global_state
     Inventory inventory;
     //int n_items;
     //Action Inventory[INVENTORY_SZ]
-
+    Level* chests;
 
 } global_state;
 

@@ -37,7 +37,7 @@ void battle_enemies(global_state* g);
 /// @return loaded character object
 Character battle_load_character(char *name);
 
-Character battle_random_enemy();
+// Character battle_random_enemy();
 
 void battle_save_data_character(char *ipath, Character *chr_save);
 

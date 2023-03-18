@@ -292,11 +292,12 @@ Character battle_load_character(char *name)
     // slog("%i",testJson.attacks[0].min_dam);
 }
 
-Character battle_random_enemy(){
-    int upper = 2;
-    int lower = 1;
-    int num = (rand() %(upper - lower + 1)) + lower;
-}
+// Character battle_random_enemy(){
+//     int upper = 2;
+//     int lower = 1;
+//     int num = (rand() %(upper - lower + 1)) + lower;
+//     return num;
+// }
 
 
 //TODO still 1/2 broken, gotta fix

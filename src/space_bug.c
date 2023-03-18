@@ -12,7 +12,7 @@ Entity *space_bug_new(Vector2D position)
     ent = entity_new();
     if (!ent)return NULL;
     ent->sprite = gf2d_sprite_load_all(
-        "images/space_bug_top.png",
+        "images/player_world.png",
         128,
         128,
         16,

@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
     ent = space_bug_new(vector2d(100, 100));
     level = level_load("config/test.level");
     level_set_active_level(level);
+    // g->chests = level_load("config/chest.level");
 
     Character Player = battle_load_character("player_data/player.json");
     monst_inst player_i = { &Player, Player.max_hp };
@@ -177,6 +178,7 @@ int main(int argc, char *argv[])
         else
         {
             level_draw(level_get_active_level());
+            // level_draw(g->chests);
             entity_draw_all();
             camera_world_snap();
         }
@@ -210,6 +212,7 @@ int main(int argc, char *argv[])
         // }
     }
     level_free(level);
+    // level_free(g->chests);
     nk_sdl_shutdown();
     entity_free(ent);
     slog("---==== END ====---");

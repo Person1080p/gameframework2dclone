@@ -90,7 +90,7 @@ void entity_draw(Entity *ent)
             (Uint32)ent->frame);
     }
     gf2d_draw_pixel(drawPosition,GFC_COLOR_YELLOW);
-    gf2d_draw_circle(drawPosition,10,GFC_COLOR_YELLOW);
+    gf2d_draw_circle(drawPosition,30,GFC_COLOR_YELLOW);
 }
 
 void entity_draw_all()
@@ -110,18 +110,23 @@ void entity_update(Entity *ent)
     {
         if (ent->update(ent))return;// if the update function returns 1, do not do generic update
     }
-    ent->frame += 0.1;
-    if (ent->frame >= 16)ent->frame = 0;
-    if (level_shape_clip(level_get_active_level(),entity_get_shape_after_move(ent) ))
+    // ent->frame += 0.1;//TODO THIS ANIMATES
+    // if (ent->frame >= 16)ent->frame = 0;//TODO ALSO HERE
+    if (level_shape_clip(level_get_active_level(),entity_get_shape_after_move(ent) ))//TODO HITS A WALL
     {
         //our next position is a hit, so don't move
         return;
     }
+    // if (level_shape_clip(g->chests,entity_get_shape_after_move(ent) ))//HITS A CHEST
+    // {
+    //     //our next position is a hit, so don't move
+    //     return;
+    // }
     vector2d_add(ent->position,ent->position,ent->velocity);
     if(vector2d_magnitude_compare(ent->velocity,0) != 0)
     {
         //means the vector is non zero
-        ent->rotation = (vector2d_angle(ent->velocity) + 180);
+        // ent->rotation = (vector2d_angle(ent->velocity) + 180);//TODO THIS DOES TURH
 //        angle_clamp_radians(&ent->rotation);
     }
 }

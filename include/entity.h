@@ -7,6 +7,8 @@
 
 #include "gf2d_sprite.h"
 
+// #include "globals.h"
+
 typedef struct Entity_S
 {
     Bool    _inuse;
