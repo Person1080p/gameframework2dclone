@@ -3,8 +3,7 @@
     "sprite_path": "images/demon/1.png",
     "name": "Player",
     "level": 3,
-    "hp": 120,
-    "max_hp": 120,
+    "max_hp": 920,
     "n_attacks": 7,
     "attacks": [
         {

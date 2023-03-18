@@ -3,30 +3,14 @@
 #include "gf2d_graphics.h"
 #include "battle.h"
 
-#define TRUE 1
-#define FALSE 0
 
-#define TURN_DELAY 2000
-
-Action *current_action;
-int press_time;
-char info_out[1024];
-
-enum
-{
-    HEATED,
-    NEXT,
-    P1_INST,
-    P2_INST,
-    NUM_MESSAGES
-};
 
 char *Messages[] =
-    {
-        "A Heated Battle",
-        "Next",
-        "Player 1 Instance",
-        "Player 2 Instance",
+{
+    "A Heated Battle",
+    "Next",
+    "Player 1 Instance",
+    "Player 2 Instance",
 };
 
 void battle_menu_output(struct nk_context *ctx, char *info_out)
@@ -40,10 +24,13 @@ void battle_menu_output(struct nk_context *ctx, char *info_out)
     nk_end(ctx);
 }
 
-void battle_menu_enemy(struct nk_context *ctx, Character *c)
+void battle_menu_enemy(struct nk_context *ctx, monst_inst *inst)
 {
     char *enemy_status;
-    SDL_asprintf(&enemy_status, "ENEMY Level %i | HP: %i/%i", c->level, c->hp, c->max_hp);
+    Character* c = inst->monster;
+
+    // TODO discuss why you should *not* use asprintf
+    SDL_asprintf(&enemy_status, "ENEMY Level %i | HP: %i/%i", c->level, inst->hp, c->max_hp);
     int flags = NK_WINDOW_BORDER | NK_WINDOW_NO_SCROLLBAR;
     if (nk_begin(ctx, "top 3", nk_rect(600, 50, 200, 80), flags))
     {
@@ -56,9 +43,33 @@ void battle_menu_enemy(struct nk_context *ctx, Character *c)
     nk_end(ctx);
 }
 
-void battle_menu_attack(struct nk_context *ctx, Character *c)
+void battle_enemies(global_state* g)
+{
+    struct nk_context *ctx = g->ctx;
+    char buf[200];
+
+    monst_inst* e = g->cur_enemies;
+
+    int flags = NK_WINDOW_BORDER | NK_WINDOW_NO_SCROLLBAR;
+    if (nk_begin(ctx, "Enemies", nk_rect(900, 550, 200, 120), flags))
+    {
+        nk_layout_row_dynamic(ctx, 30, 1);
+
+        for (int i=0; i<g->n_enemies; i++) {
+            Character* c = e[i].monster;
+            snprintf(buf, 200, "%s:  %d/%d HP", c->name, e[i].hp, c->max_hp);
+
+            nk_label(ctx, buf, NK_TEXT_LEFT);
+        }
+    }
+    nk_end(ctx);
+}
+
+void battle_menu_attack(global_state* g, monst_inst* inst)
 {
     int flags = NK_WINDOW_BORDER;
+    Character* c = inst->monster;
+    struct nk_context *ctx = g->ctx;
     if (nk_begin(ctx, "top 1", nk_rect(10, 500, 200, 200), flags))
     {
         nk_layout_row_dynamic(ctx, 30, 1);
@@ -66,26 +77,29 @@ void battle_menu_attack(struct nk_context *ctx, Character *c)
         nk_label(ctx, c->name, NK_TEXT_LEFT);
 
         char *ally_status;
-        SDL_asprintf(&ally_status, "Level %i | HP: %i/%i", c->level, c->hp, c->max_hp);
+        SDL_asprintf(&ally_status, "Level %i | HP: %i/%i", c->level, inst->hp, c->max_hp);
         nk_label(ctx, ally_status, NK_TEXT_LEFT);
 
-        if (!current_action)
+        if (!g->current_action)
         {
             for (int i = 0; i < c->n_attacks; i++)
             {
                 if (nk_button_label(ctx, c->attacks[i].name)) // render all buttons, and on button press do if statement
                 {
-                    current_action = &c->attacks[i];
-                    press_time = SDL_GetTicks();
+                    g->current_action = &c->attacks[i];
+                    g->press_time = SDL_GetTicks();
                 }
             }
         }
     }
     nk_end(ctx);
 }
-void battle_menu_item(struct nk_context *ctx, Inventory *in)
+
+void battle_menu_item(global_state* g)
 {
     int flags = NK_WINDOW_BORDER;
+    struct nk_context *ctx = g->ctx;
+    Inventory* in = &g->inventory;
     if (nk_begin(ctx, "top 2", nk_rect(300, 500, 200, 200), flags))
     {
         nk_layout_row_dynamic(ctx, 30, 1);
@@ -96,8 +110,8 @@ void battle_menu_item(struct nk_context *ctx, Inventory *in)
         {
             if (nk_button_label(ctx, in->item[i].name))
             {
-                current_action = &in->item[i]; // fix later  u bum
-                press_time = SDL_GetTicks();
+                g->current_action = &in->item[i]; // fix later  u bum
+                g->press_time = SDL_GetTicks();
             }
         }
     }
@@ -112,18 +126,21 @@ int battle_action_rng(int min, int max)
 /// @param target
 /// @param act
 /// @return
-int battle_action_dmg(Character *target, Action act)
+int battle_action_dmg(global_state* g, monst_inst *target)
 {
-    int damage = battle_action_rng(act.min_dam, act.max_dam);
-    slog("%s DID THIS %i", act.name, damage);
+    Action* act = g->current_action;
+    int damage = battle_action_rng(act->min_dam, act->max_dam);
+    slog("%s DID THIS %i", act->name, damage);
     target->hp -= damage;
     slog("ENEMY HP%i", target->hp);
 
-    snprintf(info_out, 1024, "%s just took %d damage", target->name, damage);
+    Character* c = target->monster;
+
+    snprintf(g->info_out, 1024, "%s just took %d damage", c->name, damage);
 
     if (target->hp <= 0)
     {
-        slog("%s has died", target->name);
+        slog("%s has died", c->name);
         return TRUE;
     }
     else
@@ -133,56 +150,116 @@ int battle_action_dmg(Character *target, Action act)
     }
 }
 
+// find next monster in list that is alive starting at cur and wrapping
+// return NULL if all dead
+monst_inst* find_next_monster(monst_inst* a, int n, int* cur)
+{
+    int i = *cur;
+    do {
+        if (a[i].hp > 0) {
+            *cur = i;
+            return &a[i];
+            break;
+        }
+        i = (i+1) % n;
+    } while (i != *cur);
+    return NULL;
+}
+
 /// @brief true = end, false = contine
 /// @param ctx
 /// @param info_out
 /// @return
-int battle_battle(struct nk_context *ctx, Character *player, Character *enemy, Inventory *inventory)
+int battle_battle(global_state* g)
 {
-    static int whois_target = 0;
-    // strcpy(info_out, Messages[HEATED]);
-    // player goes first, meaning target is 0 enemy
-    Character *players[] = {enemy, player};
+    int n_enemies = g->n_enemies;
+    int n_allies = g->n_allies;
+    int cur_enemy = g->cur_enemy;
+    int cur_ally = g->cur_ally;
 
+    // also updates cur_enemy/ally
+    monst_inst* enemy_inst = &g->cur_enemies[cur_enemy];
+    monst_inst* player_inst = &g->allies[cur_ally];
+    //cur_enemy = enemy_inst - enemies_inst;
+
+    monst_inst *players[] = {enemy_inst, player_inst};
+
+    Character* player = player_inst->monster;
+    Character* enemy = enemy_inst->monster;
     int cur_time = SDL_GetTicks();
-    int time = cur_time - press_time;
-    if (current_action)
+    int time = cur_time - g->press_time;
+    int died;
+    if (g->current_action)
     {
         // if you kill them
-        if (battle_action_dmg(players[whois_target], *current_action))
+        if ((died = battle_action_dmg(g, players[g->turn])))
         {
-            whois_target = 0;
-            current_action = NULL;
-            return FALSE; // return false to end battle
+            // for now just replace 1 ally slot
+            if (g->turn == PLAYER_TURN) {
+                //allies_inst[1] = *enemy_inst; // last one who died
+                //g->n_allies++; // < MAX_ALLIES
+
+                g->n_enemies--;
+                // if they're all dead
+                if (!g->n_enemies)
+                    return FALSE;
+
+                //erase defeated enemy
+                memmove(&g->cur_enemies[cur_enemy], &g->cur_enemies[cur_enemy+1], (n_enemies-cur_enemy)*sizeof(monst_inst));
+            } else {
+                g->n_allies--;
+                if (!g->n_allies)
+                    return FALSE;
+
+                // TODO game ends if all allies die?  if not we need
+                // a separate array
+                memmove(&g->allies[cur_ally], &g->allies[cur_ally+1], (n_allies-cur_ally)*sizeof(monst_inst));
+            }
+        } else {
+            if (!died || g->turn == PLAYER) {
+                g->cur_ally++;
+                g->cur_ally %= n_allies;
+            }
+            if (!died || g->turn == ENEMY) {
+                g->cur_enemy++;
+                g->cur_enemy %= n_enemies;
+            }
         }
+        g->current_action = NULL;
 
-        whois_target = !whois_target;
-        current_action = NULL;
+        g->turn = !g->turn;
 
-        slog(info_out);
-        press_time = cur_time;
+        slog(g->info_out);
+        g->press_time = cur_time;
     }
     else if (time > TURN_DELAY)
     {
         // if player is target, choose enemy attack
-        if (whois_target)
+        if (g->turn == ENEMY_TURN)
         {
-            current_action = &enemy->attacks[0]; // chose randomly
+            // TODO pick random attack
+            g->current_action = &enemy->attacks[0];
         }
         else
         {
-            snprintf(info_out, 1024, "%s pick a new attack", player->name);
+            snprintf(g->info_out, 1024, "%s pick a new attack", player->name);
+            g->press_time = cur_time;
         }
     }
     gf2d_sprite_draw_image(player->sprite, vector2d(0, 0));
     gf2d_sprite_draw_image(enemy->sprite, vector2d(700, -150));
-    battle_menu_attack(ctx, player);
-    battle_menu_enemy(ctx, enemy);
-    battle_menu_item(ctx, inventory);
-    battle_menu_output(ctx, info_out);
+    battle_menu_attack(g, player_inst);
+    battle_menu_enemy(g->ctx, enemy_inst);
+    battle_menu_item(g);
+    battle_menu_output(g->ctx, g->info_out);
+
+    battle_enemies(g);
+
+    //TODO move out to main
     nk_sdl_render(NK_ANTI_ALIASING_ON);
     return TRUE;
 }
+
 Character battle_load_character(char *name)
 {
     SJson *lj;
@@ -193,11 +270,12 @@ Character battle_load_character(char *name)
     // strcat(path, ".json");
     lj = sj_load(path);
 
-    charJson.sprite = NULL;
     strcpy(charJson.sprite_path, sj_object_get_value_as_string(lj, "sprite_path"));
+    printf("%s\n", charJson.sprite_path);
+
+    charJson.sprite = gf2d_sprite_load_image(charJson.sprite_path);
     strcpy(charJson.name, sj_object_get_value_as_string(lj, "name"));
     sj_object_get_value_as_int(lj, "level", &charJson.level);
-    sj_object_get_value_as_int(lj, "hp", &charJson.hp);
     sj_object_get_value_as_int(lj, "max_hp", &charJson.max_hp);
     sj_object_get_value_as_int(lj, "n_attacks", &charJson.n_attacks);
     SJson *attackJson = sj_object_get_value(lj, "attacks");

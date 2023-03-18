@@ -1,49 +1,36 @@
 #ifndef BATTLE_H
 #define BATTLE_H
 
-#include <SDL.h>
 #include "gf2d_sprite.h"
+#include "globals.h"
 
-/// @brief Used for Both Abilities and Damage
-typedef struct Action
+// TODO put Messages an enum in globals?
+enum
 {
-    char name[20];
-    int min_dam;
-    int max_dam;
-} Action;
+    HEATED,
+    NEXT,
+    P1_INST,
+    P2_INST,
+    NUM_MESSAGES
+};
 
-typedef struct Character
-{
-    Sprite *sprite;
-    char sprite_path[1024];
-    char name[50];
-    int level;
-    int hp;
-    int max_hp;
-    int n_attacks;
-    Action attacks[7];
-} Character;
-
-typedef struct Inventory
-{
-    int num_item;
-    Action item[20];
-    // add item amounts
-} Inventory;
+extern char* Messages[];
 
 void battle_menu_output(struct nk_context *ctx, char *info_out);
 
-void battle_menu_enemy(struct nk_context *ctx, Character *c);
+void battle_menu_enemy(struct nk_context *ctx, monst_inst* inst);
 
-void battle_menu_attack(struct nk_context *ctx, Character *c);
+void battle_menu_attack(global_state* g, monst_inst* inst);
 
-void battle_menu_item(struct nk_context *ctx, Inventory *i);
+void battle_menu_item(global_state* g);
 
 int battle_action_rng(int max, int min);
 
-int battle_action_dmg(Character *enemyc, Action act);
+int battle_action_dmg(global_state* g, monst_inst *target);
 
-int battle_battle(struct nk_context *ctx, Character *player, Character *enemy, Inventory *inventory);
+int battle_battle(global_state* g);
+
+void battle_enemies(global_state* g);
 
 /// @brief loads a character (enemy or ally) from a json file
 /// @param name path to character json relative to config folder

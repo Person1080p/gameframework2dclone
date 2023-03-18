@@ -1,6 +1,4 @@
 #include <SDL.h>
-#define NK_IMPLEMENTATION
-#define NK_SDL_RENDERER_IMPLEMENTATION
 #include "simple_logger.h"
 #include "simple_json.h"
 #include "gf2d_graphics.h"
@@ -15,6 +13,9 @@
 #include "world.h"
 #include "battle.h"
 
+#include "globals.h"
+
+
 enum
 {
     DELAY,
@@ -22,26 +23,14 @@ enum
     NEVER
 };
 
-int fullscreen_gui;
+global_state mystate;
+global_state* g = &mystate;
 
-#define TRUE 1
-#define FALSE 0
 
-Inventory inventory =
-    {
-        2,
-        {{"Heal", -30, -30}, {"Fire", 20, 30}}
 
-};
 
 int main(int argc, char *argv[])
 {
-    Character Player = battle_load_character("player_data/player.json");
-    Character Enemy = battle_load_character("default_enemy/enemy0.json");
-    battle_save_data_character("player_data/player.json", &Player);
-
-    slog(Player.attacks[6].name);
-
     /*variable declarations*/
     int done = 0;
     Level *level;
@@ -53,7 +42,6 @@ int main(int argc, char *argv[])
     // gme_entity_init(1024);
     entity_manager_init(1024);
 
-    int battle_now = 0;
 
     /*mouse vars*/
     int mx, my;
@@ -77,7 +65,7 @@ int main(int argc, char *argv[])
     // gme_entity_manager_init(1024);
     SDL_ShowCursor(SDL_DISABLE);
 
-    struct nk_context *ctx = gf2d_nuklear_init();
+    g->ctx = gf2d_nuklear_init();
     SDL_Event evt;
 
     /*demo setup*/
@@ -87,8 +75,28 @@ int main(int argc, char *argv[])
     level = level_load("config/test.level");
     level_set_active_level(level);
 
-    // TODO in a loop read in json (or whatever) and load all sprites
-    // arrays of players (if you have more than one player) and enemys
+    Character Player = battle_load_character("player_data/player.json");
+    monst_inst player_i = { &Player, Player.max_hp };
+    g->allies[0] = player_i;
+    g->n_allies = 1;
+
+    char pathbuf[1024];
+    for (int i=0; i<NUM_ENEMIES; i++) {
+        snprintf(pathbuf, 1024, "default_enemy/enemy%d.json", i);
+        g->enemies[i] = battle_load_character(pathbuf);
+    }
+
+    /*
+    g->n_items = 2;
+    g->Inventory[0] = {"Heal", -30, -30};
+    g->Inventory[1] = {"Fire", 20, 30};
+    */
+    g->inventory = (Inventory){ 2, {{"Heal", -30, -30},{"Fire", 20, 30}} };
+
+    //battle_save_data_character("player_data/player.json", &Player);
+
+    slog(Player.attacks[6].name);
+
 
     // exent = entity_new();
     // exent->sprite = gf2d_sprite_load_all(
@@ -98,11 +106,10 @@ int main(int argc, char *argv[])
     //     16,
     //     0);
 
-    battle_now = TRUE;
     while (!done)
     {
 
-        nk_input_begin(ctx);
+        nk_input_begin(g->ctx);
         while (SDL_PollEvent(&evt))
         {
             if (evt.type == SDL_QUIT)
@@ -112,7 +119,7 @@ int main(int argc, char *argv[])
             }
             nk_sdl_handle_event(&evt);
         }
-        nk_input_end(ctx);
+        nk_input_end(g->ctx);
 
         SDL_PumpEvents(); // update SDL's internal event structures
         /*handle keyboard and mouse events here*/
@@ -138,16 +145,34 @@ int main(int argc, char *argv[])
         // SDL_asprintf(&info_out, "Char's %s did Damage", current_action->name);
         // slog(info_out);
         // slog("Player Turn: %i", turn_player);
-        if (keys[SDL_SCANCODE_P])
+        if (!g->state && keys[SDL_SCANCODE_P])
         {
-            battle_now = 1;
-            Enemy.hp = Enemy.max_hp;
+            g->state = BATTLE;
+            g->current_action = NULL;
+            for (int i=0; i<MAX_BAT_EN; i++) {
+                g->cur_enemies[i].monster = &g->enemies[rand()%NUM_ENEMIES];
+                g->cur_enemies[i].hp = g->cur_enemies[i].monster->max_hp;
+            }
+            g->n_enemies = rand() % MAX_BAT_EN + 1;
+            slog("Num enemies = %d\n", g->n_enemies);
+            for (int i=0; i<g->n_allies; i++) {
+                g->allies[i].hp = g->allies[i].monster->max_hp;
+            }
+            g->press_time = SDL_GetTicks();
+            // TODO
+            strcpy(g->info_out, Messages[HEATED]);
         }
-        if (battle_now)
+
+        if (g->state == BATTLE)
         {
-            Player.sprite = gf2d_sprite_load_image(Player.sprite_path);
-            Enemy.sprite = gf2d_sprite_load_image(Enemy.sprite_path);
-            battle_now = battle_battle(ctx, &Player, &Enemy, &inventory);
+            if (!battle_battle(g)) {
+                g->state = MAP;
+
+                // either exit or reset player/allies health
+                if (!g->n_allies) {
+                    return 0;
+                }
+            }
         }
         else
         {

@@ -1,18 +1,14 @@
 {
-    "character": {
-        "sprite": 0,
-        "sprite_path": "images/demon/4.png",
-        "name": "Berith",
-        "level": 5,
-        "hp": 300,
-        "max_hp": 300,
-        "n_attacks": 1,
-        "attacks": [
-            {
-                "name": "Stab",
-                "min_dam": 0,
-                "max_dam": 110
-            }
-        ]
-    }
+    "sprite_path": "images/demon/4.png",
+    "name": "Berith",
+    "level": 5,
+    "max_hp": 300,
+    "n_attacks": 1,
+    "attacks": [
+        {
+            "name": "Stab",
+            "min_dam": 1,
+            "max_dam": 110
+        }
+    ]
 }

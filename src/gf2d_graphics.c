@@ -1,20 +1,11 @@
 //#include <SDL.h>
-//#define NK_INCLUDE_FIXED_TYPES
-//#define NK_INCLUDE_DEFAULT_ALLOCATOR
-//#define NK_INCLUDE_STANDARD_VARARGS
-//#define NK_INCLUDE_FIXED_TYPES
-//#define NK_INCLUDE_STANDARD_IO
-//#define NK_INCLUDE_FONT_BAKING
-//#define NK_INCLUDE_DEFAULT_FONT
-//#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
-//#define NK_IMPLEMENTATION
-//#define NK_SDL_RENDERER_IMPLEMENTATION
-//#include "nuklear.h"
-//#include "nuklear_sdl_renderer.h"
 
 #include <SDL_image.h>
 #include <stdlib.h>
 
+// nuklear included in graphics.h
+#define NK_IMPLEMENTATION
+#define NK_SDL_RENDERER_IMPLEMENTATION
 #include "gf2d_graphics.h"
 #include "simple_logger.h"
 

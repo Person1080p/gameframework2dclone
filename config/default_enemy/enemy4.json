@@ -1,0 +1,14 @@
+{
+    "sprite_path": "images/demon/6.png",
+    "name": "Berith",
+    "level": 5,
+    "max_hp": 300,
+    "n_attacks": 1,
+    "attacks": [
+        {
+            "name": "Stab",
+            "min_dam": 1,
+            "max_dam": 110
+        }
+    ]
+}

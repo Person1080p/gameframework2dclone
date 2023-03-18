@@ -1,9 +1,7 @@
 {
-    "sprite": 0,
     "sprite_path": "images/demon/2.png",
     "name": "Pixie",
     "level": 1,
-    "hp": 120,
     "max_hp": 120,
     "n_attacks": 1,
     "attacks": [

@@ -146,6 +146,7 @@ Sprite *gf2d_sprite_load_all(
     if (sprite != NULL)
     {
         // found a copy already in memory
+        puts("found copy already in memory");
         sprite->ref_count++;
         return sprite;
     }
