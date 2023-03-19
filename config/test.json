@@ -1,4 +1,4 @@
-{"sprite":0,"sprite_path":"images/monster/1.png","name":"Player","level":3,"hp":120,"max_hp":120,"n_attacks":7,"attacks":[{"name":"Punch","min_dam":10,"max_dam":15
+{"sprite":0,"sprite_path":"images/monster/1.png","name":"Player","level":3,"hp":720,"max_hp":920,"n_attacks":7,"attacks":[{"name":"Punch","min_dam":10,"max_dam":15
         },{"name":"Fire","min_dam":130,"max_dam":30
         },{"name":"Fire2","min_dam":10,"max_dam":30
         },{"name":"Fire3","min_dam":10,"max_dam":30

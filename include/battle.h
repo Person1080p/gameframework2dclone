@@ -16,6 +16,8 @@ enum
 
 extern char* Messages[];
 
+void start_battle(global_state* g);
+
 void battle_menu_output(struct nk_context *ctx, char *info_out);
 
 void battle_menu_enemy(struct nk_context *ctx, monst_inst* inst);

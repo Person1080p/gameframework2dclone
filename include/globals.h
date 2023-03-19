@@ -13,15 +13,16 @@
 #define ENEMY 1
 
 #define TURN_DELAY 2000
-#define NUM_ENEMIES 3
-#define MAX_BAT_EN 3
+#define NUM_ENEMIES 10
+#define MAX_BAT_EN 4
 #define MAX_ALLIES 1
 #define IVENTORY_SZ 20
 
 enum { MAP, BATTLE };
 enum { PLAYER_TURN, ENEMY_TURN };
 
-#include "battle.h"
+#include "level.h"
+
 typedef struct global_state
 {
     struct nk_context *ctx;
@@ -47,6 +48,10 @@ typedef struct global_state
     //int n_items;
     //Action Inventory[INVENTORY_SZ]
 
+    // a "level" of positions of chests
+    Level* chests;
+
+    Vector2D world_center;
 } global_state;
 
 #endif

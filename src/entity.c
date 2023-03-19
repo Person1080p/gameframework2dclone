@@ -3,6 +3,8 @@
 #include "camera.h"
 #include "level.h"
 #include "entity.h"
+#include "globals.h"
+#include "battle.h"
 
 typedef struct
 {
@@ -10,6 +12,8 @@ typedef struct
     Entity *entity_list;
     SJson  *entity_def;
 }EntityManager;
+
+extern global_state* g;
 
 static EntityManager entity_manager = {0};
 
@@ -112,17 +116,24 @@ void entity_update(Entity *ent)
     }
     // ent->frame += 0.1;//TODO THIS ANIMATES
     // if (ent->frame >= 16)ent->frame = 0;//TODO ALSO HERE
-    if (level_shape_clip(level_get_active_level(),entity_get_shape_after_move(ent) ))//TODO HITS A WALL
+    if (level_shape_clip(level_get_active_level(), entity_get_shape_after_move(ent) ))//TODO HITS A WALL
     {
         //our next position is a hit, so don't move
         return;
     }
-    if (level_shape_clip(level_get_active_chest(),entity_get_shape_after_move(ent) ))//HITS A CHEST
+
+    // TODO remove/pickup things that trigger a battle right after hitting them
+    if (level_shape_clip(g->chests, entity_get_shape_after_move(ent) ))//HITS A CHEST
     {
-        //our next position is a hit, so don't move
-        Vector2D pos = vector2d(750, 750);
-        ent->position = pos;
-        slog("HIT A CHEST, GOT A NEW PARTY MEMEBER");
+
+        if (g->state != BATTLE) {
+            slog("HIT A CHEST, LET's FIGHT!");
+            start_battle(g);
+
+            // until we learn to remove a chest from a chest "level"
+            Vector2D pos = vector2d(750, 750);
+            ent->position = pos;
+        }
         return;
     }
     vector2d_add(ent->position,ent->position,ent->velocity);

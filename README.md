@@ -40,7 +40,7 @@ You should now have a `gf2d` binary within the root of your git repository. Exec
 - Turn Based Combat System <!---Done-->
 - 10 recruitable monsters
 - Player Upgrade System (working)
-- Tile based world that is randomly generated
-- 5 In-world Interactables (NPC's, Chests, etc.)
+- Tile based world that is randomly generated <!---Done-->
+- 5 In-world Interactables (NPC's, Chests, etc.)<!---1/4-->
 
-<!---5/10-->
+<!---6/10-->

@@ -12,7 +12,6 @@
 void level_build(Level *level);
 
 static Level *activeLevel = NULL;
-static Level *activeChest = NULL;
 
 Level *level_get_active_level()
 {
@@ -213,17 +212,6 @@ void level_free(Level *level)
     gfc_list_foreach(level->clips,free);
     gfc_list_delete(level->clips);
     free(level);
-}
-
-
-Level *level_get_active_chest()
-{
-    return activeChest;
-}
-
-void level_set_active_chest(Level *level)
-{
-    activeChest = level;
 }
 
 

@@ -3,6 +3,7 @@
     "sprite_path": "images/monster/1.png",
     "name": "Player",
     "level": 3,
+    "hp": 720,
     "max_hp": 920,
     "n_attacks": 7,
     "attacks": [

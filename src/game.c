@@ -11,10 +11,10 @@
 #include "space_bug.h"
 
 #include "battle.h"
-#include "event.h"
 
 #include "globals.h"
 
+#include "utils.h"
 
 enum
 {
@@ -23,18 +23,15 @@ enum
     NEVER
 };
 
-global_state mystate;
-global_state* g = &mystate;
-
-
-
+global_state *g;
 
 int main(int argc, char *argv[])
 {
+    global_state mystate;
+    g = &mystate;
+
     /*variable declarations*/
     int done = 0;
-    Level *level;
-    Level *chests;
     const Uint8 *keys;
     Entity *ent;
 
@@ -42,7 +39,6 @@ int main(int argc, char *argv[])
     Sprite *background;
     // gme_entity_init(1024);
     entity_manager_init(1024);
-
 
     /*mouse vars*/
     int mx, my;
@@ -73,34 +69,36 @@ int main(int argc, char *argv[])
     background = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
     mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
     ent = space_bug_new(vector2d(750, 750));
-    level = level_load(event_rand_level(0,2));
-    level_set_active_level(level);
 
-    chests = level_load(event_rand_chest(0,3));
-    level_set_active_chest(chests);
+    char buf[1024];
+    snprintf(buf, 1024, "config/levels/level%d.json", rand_range(0, 2));
+    level_set_active_level(level_load(buf));
+
+    snprintf(buf, 1024, "config/chests/chest%d.json", rand_range(0, 3));
+    g->chests = level_load(buf);
 
     Character Player = battle_load_character("player_data/player.json");
-    monst_inst player_i = { &Player, Player.max_hp };
+    monst_inst player_i = {&Player, Player.hp};
     g->allies[0] = player_i;
     g->n_allies = 1;
 
     char pathbuf[1024];
-    for (int i=0; i<NUM_ENEMIES; i++) {
+    for (int i = 0; i < NUM_ENEMIES; i++)
+    {
         snprintf(pathbuf, 1024, "default_enemy/enemy%d.json", i);
         g->enemies[i] = battle_load_character(pathbuf);
     }
-
+    g->world_center = vector2d(750, 750);
     /*
     g->n_items = 2;
     g->Inventory[0] = {"Heal", -30, -30};
     g->Inventory[1] = {"Fire", 20, 30};
     */
-    g->inventory = (Inventory){ 2, {{"Heal", -30, -30},{"Fire", 20, 30}} };
+    g->inventory = (Inventory){2, {{"Heal", -30, -30}, {"Fire", 20, 30}}};
 
-    //battle_save_data_character("player_data/player.json", &Player);
+    battle_save_data_character("player_data/player.json", &Player);
 
     slog(Player.attacks[6].name);
-
 
     // exent = entity_new();
     // exent->sprite = gf2d_sprite_load_all(
@@ -145,43 +143,29 @@ int main(int argc, char *argv[])
         // contents next
         // UI elements last
 
-        // SDL_asprintf(&info_out, "Char's %s did %d", current_action->name, (current_action->max_dam, current_action->min_dam));
-        // SDL_asprintf(&info_out, "Char's %s did Damage", current_action->name);
-        // slog(info_out);
-        // slog("Player Turn: %i", turn_player);
         if (!g->state && keys[SDL_SCANCODE_P])
         {
-            g->state = BATTLE;
-            g->current_action = NULL;
-            for (int i=0; i<MAX_BAT_EN; i++) {
-                g->cur_enemies[i].monster = &g->enemies[rand()%NUM_ENEMIES];
-                g->cur_enemies[i].hp = g->cur_enemies[i].monster->max_hp;
-            }
-            g->n_enemies = rand() % MAX_BAT_EN + 1;
-            slog("Num enemies = %d\n", g->n_enemies);
-            for (int i=0; i<g->n_allies; i++) {
-                g->allies[i].hp = g->allies[i].monster->max_hp;
-            }
-            g->press_time = SDL_GetTicks();
-            // TODO
-            strcpy(g->info_out, Messages[HEATED]);
+            start_battle(g);
         }
 
         if (g->state == BATTLE)
         {
-            if (!battle_battle(g)) {
+            ent->position = g->world_center;
+            if (!battle_battle(g))
+            {
                 g->state = MAP;
 
                 // either exit or reset player/allies health
-                if (!g->n_allies) {
+                if (!g->n_allies)
+                {
                     return 0;
                 }
             }
         }
         else
         {
+            level_draw(g->chests);
             level_draw(level_get_active_level());
-            level_draw(chests);
             entity_draw_all();
             camera_world_snap();
         }
@@ -201,7 +185,7 @@ int main(int argc, char *argv[])
         // camera_center_at(mousep);
         // slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
         // slog("Mouse at %i , %i",mx,my);
-        // slog("Char at %f , %f",ent->position.x,ent->position.y);
+        slog("Char at %f , %f",ent->position.x,ent->position.y);
         if ((pause == 0) && (keys[SDL_SCANCODE_ESCAPE]))
         {
             // pause = 1;
@@ -210,16 +194,15 @@ int main(int argc, char *argv[])
         }
         if (keys[SDL_SCANCODE_O])
         {
-            level = level_load(event_rand_level(0,2));
-            level_set_active_level(level);
 
-            chests = level_load(event_rand_chest(0,3));
-            level_set_active_chest(chests);
+            snprintf(buf, 1024, "config/levels/level%d.json", rand_range(0, 2));
+            level_set_active_level(level_load(buf));
+
+            snprintf(buf, 1024, "config/chests/chest%d.json", rand_range(0, 3));
+            g->chests = level_load(buf);
 
             Vector2D pos = vector2d(750, 750);
             ent->position = pos;
-
-
         }
 
         // if(pause == 1)
@@ -229,10 +212,13 @@ int main(int argc, char *argv[])
         //     slog("%i",pause);
         // }
     }
-    level_free(level);
-    level_free(chests);
-    nk_sdl_shutdown();
+
+    // TODO create cleanup function freeing all game state stuff
+    level_free(level_get_active_level());
+    level_free(g->chests);
     entity_free(ent);
+
+    nk_sdl_shutdown();
     slog("---==== END ====---");
     return 0;
 }
