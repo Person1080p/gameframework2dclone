@@ -11,6 +11,7 @@
 #include "space_bug.h"
 
 #include "battle.h"
+#include "event.h"
 
 #include "globals.h"
 
@@ -71,11 +72,11 @@ int main(int argc, char *argv[])
     /*demo setup*/
     background = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
     mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
-    ent = space_bug_new(vector2d(100, 100));
-    level = level_load("config/test.level");
+    ent = space_bug_new(vector2d(750, 750));
+    level = level_load(event_rand_level(0,2));
     level_set_active_level(level);
-    
-    chests = level_load("config/chest.level");
+
+    chests = level_load(event_rand_chest(0,3));
     level_set_active_chest(chests);
 
     Character Player = battle_load_character("player_data/player.json");
@@ -200,12 +201,27 @@ int main(int argc, char *argv[])
         // camera_center_at(mousep);
         // slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
         // slog("Mouse at %i , %i",mx,my);
+        // slog("Char at %f , %f",ent->position.x,ent->position.y);
         if ((pause == 0) && (keys[SDL_SCANCODE_ESCAPE]))
         {
             // pause = 1;
             done = 1; // exit condition
             slog("%i", pause);
         }
+        if (keys[SDL_SCANCODE_O])
+        {
+            level = level_load(event_rand_level(0,2));
+            level_set_active_level(level);
+
+            chests = level_load(event_rand_chest(0,3));
+            level_set_active_chest(chests);
+
+            Vector2D pos = vector2d(750, 750);
+            ent->position = pos;
+
+
+        }
+
         // if(pause == 1)
         // {
         //     if ((keys[SDL_SCANCODE_ESCAPE]))

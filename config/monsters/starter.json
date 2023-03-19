@@ -1,6 +1,6 @@
 {
     "sprite": 0,
-    "sprite_path": "images/demon/1.png",
+    "sprite_path": "images/monster/1.png",
     "name": "Player",
     "level": 3,
     "hp": 120,

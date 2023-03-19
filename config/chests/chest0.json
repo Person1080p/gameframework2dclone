@@ -2,7 +2,7 @@
     "level":
     {
         "name":"testLevel",
-        "tileSet":"images/chest.png",
+        "tileSet":"images/chest64.png",
         "tileFPL":0,
         "tileSize":[64,64],
         "tileMap":[

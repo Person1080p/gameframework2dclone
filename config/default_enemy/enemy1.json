@@ -1,5 +1,5 @@
 {
-    "sprite_path": "images/demon/3.png",
+    "sprite_path": "images/monster/3.png",
     "name": "Fairy",
     "level": 3,
     "max_hp": 60,

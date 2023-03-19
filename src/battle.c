@@ -2,6 +2,7 @@
 #include "simple_json.h"
 #include "gf2d_graphics.h"
 #include "battle.h"
+#include "event.h"
 
 
 

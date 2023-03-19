@@ -1,5 +1,5 @@
 {
-    "sprite_path": "images/demon/4.png",
+    "sprite_path": "images/monster/4.png",
     "name": "Berith",
     "level": 5,
     "max_hp": 300,

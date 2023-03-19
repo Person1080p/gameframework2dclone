@@ -120,7 +120,7 @@ void entity_update(Entity *ent)
     if (level_shape_clip(level_get_active_chest(),entity_get_shape_after_move(ent) ))//HITS A CHEST
     {
         //our next position is a hit, so don't move
-        Vector2D pos = vector2d(300, 300);
+        Vector2D pos = vector2d(750, 750);
         ent->position = pos;
         slog("HIT A CHEST, GOT A NEW PARTY MEMEBER");
         return;
