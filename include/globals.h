@@ -15,7 +15,7 @@
 #define TURN_DELAY 2000
 #define NUM_ENEMIES 10
 #define MAX_BAT_EN 4
-#define MAX_ALLIES 1
+#define MAX_ALLIES 3
 #define IVENTORY_SZ 20
 
 enum { MAP, BATTLE };

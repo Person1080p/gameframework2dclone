@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     */
     g->inventory = (Inventory){2, {{"Heal", -30, -30}, {"Fire", 20, 30}}};
 
-    battle_save_data_character("player_data/player.json", &Player);
+    // battle_save_data_character("player_data/player.json", &Player);
 
     slog(Player.attacks[6].name);
 

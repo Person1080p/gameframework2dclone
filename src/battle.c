@@ -43,14 +43,14 @@ void battle_menu_output(struct nk_context *ctx, char *info_out)
     nk_end(ctx);
 }
 
-void battle_menu_enemy(struct nk_context *ctx, monst_inst *inst)
+void battle_menu_chracter_status(struct nk_context *ctx, monst_inst *inst,int x, int y, char* title)
 {
     char enemy_status[200];
     Character *c = inst->monster;
 
-    snprintf(enemy_status, 200, "ENEMY Level %i | HP: %i/%i", c->level, inst->hp, c->max_hp);
+    snprintf(enemy_status, 200, "Level %i | HP: %i/%i",c->level, inst->hp, c->max_hp);
     int flags = NK_WINDOW_BORDER | NK_WINDOW_NO_SCROLLBAR;
-    if (nk_begin(ctx, "top 3", nk_rect(600, 50, 200, 80), flags))
+    if (nk_begin(ctx, title, nk_rect(x, y, 200, 80), flags))
     {
         nk_layout_row_dynamic(ctx, 30, 1);
 
@@ -209,6 +209,7 @@ int battle_battle(global_state *g)
                 if (!g->n_enemies)
                 {
                     battle_load_new_world(g);
+                    battle_save_data_character("player_data/player.json", player);
                     strcpy(g->info_out, "YOU WON THE BATTLE, +1 Level and More HP");
                     player->level++;
                     return FALSE;
@@ -262,10 +263,22 @@ int battle_battle(global_state *g)
             g->press_time = cur_time;
         }
     }
-    gf2d_sprite_draw_image(player->sprite, vector2d(0, 0));
-    gf2d_sprite_draw_image(enemy->sprite, vector2d(700, -150));
+    char winbuf[1024];
+    for(int i=0;i<g->n_enemies;i++){
+        snprintf(winbuf,1024,"enemytitle%i",i);
+        battle_menu_chracter_status(g->ctx, &g->cur_enemies[i],(400+200*i),200,winbuf);
+        gf2d_sprite_draw_image( g->cur_enemies[i].monster->sprite, vector2d((300+200*i), -150));
+       
+    }
+    for(int i=0;i<g->n_allies;i++){
+        snprintf(winbuf,1024,"allytitle%i",i);
+        battle_menu_chracter_status(g->ctx, &g->allies[i],(100+200*i),400,winbuf);
+        gf2d_sprite_draw_image( g->allies[i].monster->sprite, vector2d((0+200*i), 0));
+        // gf2d_sprite_draw_image(player->sprite, vector2d(0, 0));
+    }
+    // gf2d_sprite_draw_image(enemy->sprite, vector2d(700, -150));
     battle_menu_attack(g, player_inst);
-    battle_menu_enemy(g->ctx, enemy_inst);
+    
     battle_menu_item(g);
     // battle_menu_output(g->ctx, g->info_out);
 
@@ -324,17 +337,14 @@ void battle_save_data_character(char *ipath, Character *chr_save)
     strcpy(path, "config/");
     strcat(path, ipath);
     SJson *source = sj_load(path);
-    SJson *charjson = sj_object_get_value(source, "character");
     SJson *dest = sj_copy(source);
-    sj_object_delete_key(dest, "character");
-    SJson *num;
+    SJson *char_level;
 
-    num = sj_new_int(234);
-    sj_object_delete_key(charjson, "level");
-    sj_object_insert(charjson, "level", num);
-    sj_object_insert(dest, "character", charjson);
+    char_level = sj_new_int(chr_save->level+1);
+    sj_object_delete_key(dest, "level");
+    sj_object_insert(dest, "level", char_level);
 
-    sj_save(dest, "config/test.json");
+    sj_save(dest, path);
 }
 
 void battle_load_new_world(global_state *g)

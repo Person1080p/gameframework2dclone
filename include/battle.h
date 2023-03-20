@@ -20,7 +20,7 @@ void start_battle(global_state* g);
 
 void battle_menu_output(struct nk_context *ctx, char *info_out);
 
-void battle_menu_enemy(struct nk_context *ctx, monst_inst* inst);
+void battle_menu_chracter_status(struct nk_context *ctx, monst_inst *inst,int x, int y, char* title);
 
 void battle_menu_attack(global_state* g, monst_inst* inst);
 
