@@ -28,30 +28,34 @@ If the above build process does not work, and you are running any linux distro w
     - [P] Force Starts a new Battle
     - [ESC] Exits the game
 
+# Code Reuse
+Most important pieces are handled in the battle.c/h file that handles most of the turn based combat. If you want to reused feel free to modify the files
+The `./config` folder is where most gameyup 
+
 # Midterm Deliverables
 
 ## Common Deliverables
-- Functioning Entity System <!---Done-->
+- Functioning Entity System
     - Done
-- Fully interact-able environment <!---Done-->
+- Fully interact-able environment
     - Done
-- User Interface (HUD, Stats, Messages, menus) <!---Done-->
+- User Interface (HUD, Stats, Messages, menus)
     - Done
-- File read / write access (high score list, saved games, saved songs, etc) <!---Done-->
+- File read / write access (high score list, saved games, saved songs, etc)
     - Done, Load all enemines and player, write player level
-- README for how to play and see all game features (this should be in the git repo) <!---Done, not acutally-->
+- README for how to play and see all game features (this should be in the git repo)
     - Done, you are reading it right now
 
 ## Assigned Deliverables
-- Turn Based Combat System <!---Done-->
+- Turn Based Combat System
     - Done
 - 10 recruitable monsters
 -   Monsters exist in json and art, not yet recruitable
-- Player Upgrade System (working)<!--Done, per level, hp multiplier-->
+- Player Upgrade System (working)
     - Done, player level up system adding additional max hp
-- Tile based world that is randomly generated <!---Done, pick from random existing tile map, and chest map-->
+- Tile based world that is randomly generated
     - Done, selected randomly from existing maps files to combine to a new map
-- 5 In-world Interactables (NPC's, Chests, etc.)<!---1/4-->
+- 5 In-world Interactables (NPC's, Chests, etc.)
     - Chests
 
 <!---7/10-->
