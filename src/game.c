@@ -70,12 +70,8 @@ int main(int argc, char *argv[])
     mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
     ent = space_bug_new(vector2d(750, 750));
 
-    char buf[1024];
-    snprintf(buf, 1024, "config/levels/level%d.json", rand_range(0, 2));
-    level_set_active_level(level_load(buf));
-
-    snprintf(buf, 1024, "config/chests/chest%d.json", rand_range(0, 3));
-    g->chests = level_load(buf);
+    strcpy(g->info_out, " ");
+    battle_load_new_world(g);
 
     Character Player = battle_load_character("player_data/player.json");
     monst_inst player_i = {&Player, Player.hp};
@@ -142,7 +138,6 @@ int main(int argc, char *argv[])
         gf2d_sprite_draw_image(background, vector2d(0, 0));
         // contents next
         // UI elements last
-
         if (!g->state && keys[SDL_SCANCODE_P])
         {
             start_battle(g);
@@ -154,7 +149,6 @@ int main(int argc, char *argv[])
             if (!battle_battle(g))
             {
                 g->state = MAP;
-
                 // either exit or reset player/allies health
                 if (!g->n_allies)
                 {
@@ -169,7 +163,8 @@ int main(int argc, char *argv[])
             entity_draw_all();
             camera_world_snap();
         }
-
+        battle_menu_output(g->ctx, g->info_out);
+        nk_sdl_render(NK_ANTI_ALIASING_ON);
         gf2d_sprite_draw(
             mouse,
             vector2d(mx, my),
@@ -185,7 +180,7 @@ int main(int argc, char *argv[])
         // camera_center_at(mousep);
         // slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
         // slog("Mouse at %i , %i",mx,my);
-        slog("Char at %f , %f",ent->position.x,ent->position.y);
+        // slog("Char at %f , %f",ent->position.x,ent->position.y);
         if ((pause == 0) && (keys[SDL_SCANCODE_ESCAPE]))
         {
             // pause = 1;
@@ -194,15 +189,7 @@ int main(int argc, char *argv[])
         }
         if (keys[SDL_SCANCODE_O])
         {
-
-            snprintf(buf, 1024, "config/levels/level%d.json", rand_range(0, 2));
-            level_set_active_level(level_load(buf));
-
-            snprintf(buf, 1024, "config/chests/chest%d.json", rand_range(0, 3));
-            g->chests = level_load(buf);
-
-            Vector2D pos = vector2d(750, 750);
-            ent->position = pos;
+            battle_load_new_world(g);
         }
 
         // if(pause == 1)

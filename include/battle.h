@@ -43,4 +43,6 @@ Character battle_load_character(char *name);
 
 void battle_save_data_character(char *ipath, Character *chr_save);
 
+void battle_load_new_world(global_state *g);
+
 #endif

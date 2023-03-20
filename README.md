@@ -31,7 +31,7 @@ You should now have a `gf2d` binary within the root of your git repository. Exec
 
 # Common Deliverables
 - Functioning Entity System <!---Done-->
-- Fully interact-able environment <!---Done barely-->
+- Fully interact-able environment <!---Done-->
 - User Interface (HUD, Stats, Messages, menus) <!---Done-->
 - File read / write access (high score list, saved games, saved songs, etc)
 - README for how to play and see all game features (this should be in the git repo) <!---Done, not acutally-->
@@ -39,8 +39,8 @@ You should now have a `gf2d` binary within the root of your git repository. Exec
 # Assigned Deliverables
 - Turn Based Combat System <!---Done-->
 - 10 recruitable monsters
-- Player Upgrade System (working)
-- Tile based world that is randomly generated <!---Done-->
+- Player Upgrade System (working)<!--Done, per level, hp multiplier-->
+- Tile based world that is randomly generated <!---Done, pick from random existing tile map, and chest map-->
 - 5 In-world Interactables (NPC's, Chests, etc.)<!---1/4-->
 
 <!---6/10-->

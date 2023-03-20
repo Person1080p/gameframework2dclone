@@ -19,8 +19,8 @@
         },
         {
             "name": "Fire2",
-            "min_dam": 10,
-            "max_dam": 30
+            "min_dam": 5000,
+            "max_dam": 6000
         },
         {
             "name": "Fire3",

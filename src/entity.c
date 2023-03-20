@@ -127,6 +127,7 @@ void entity_update(Entity *ent)
     {
 
         if (g->state != BATTLE) {
+            strcpy(g->info_out, "HIT A CHEST, LET's FIGHT!");
             slog("HIT A CHEST, LET's FIGHT!");
             start_battle(g);
 

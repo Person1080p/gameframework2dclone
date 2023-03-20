@@ -69,7 +69,7 @@ void battle_enemies(global_state *g)
     monst_inst *e = g->cur_enemies;
 
     int flags = NK_WINDOW_BORDER | NK_WINDOW_NO_SCROLLBAR;
-    if (nk_begin(ctx, "Enemies", nk_rect(900, 550, 200, 120), flags))
+    if (nk_begin(ctx, "Enemies", nk_rect(900, 500, 200, 180), flags))
     {
         nk_layout_row_dynamic(ctx, 0, 1);
 
@@ -87,7 +87,7 @@ void battle_enemies(global_state *g)
 void battle_menu_attack(global_state *g, monst_inst *inst)
 {
     struct nk_context *ctx = g->ctx;
-    int flags = NK_WINDOW_BORDER;
+    int flags = NK_WINDOW_BORDER | NK_WINDOW_NO_SCROLLBAR;
 
     char ally_status[200];
     Character *c = inst->monster;
@@ -100,12 +100,14 @@ void battle_menu_attack(global_state *g, monst_inst *inst)
         snprintf(ally_status, 200, "Level %i | HP: %i/%i", c->level, inst->hp, c->max_hp);
         nk_label(ctx, ally_status, NK_TEXT_LEFT);
 
-        if (!g->current_action)
+        // if (!g->current_action)
+        if (!g->turn)
         {
             for (int i = 0; i < c->n_attacks; i++)
             {
                 if (nk_button_label(ctx, c->attacks[i].name)) // render all buttons, and on button press do if statement
                 {
+                    // {
                     g->current_action = &c->attacks[i];
                     g->press_time = SDL_GetTicks();
                 }
@@ -125,13 +127,15 @@ void battle_menu_item(global_state *g)
         nk_layout_row_dynamic(ctx, 30, 1);
 
         nk_label(ctx, "ITEMS", NK_TEXT_LEFT);
-
-        for (int i = 0; i < in->num_item; i++)
+        if (!g->turn)
         {
-            if (nk_button_label(ctx, in->item[i].name))
+            for (int i = 0; i < in->num_item; i++)
             {
-                g->current_action = &in->item[i]; // fix later  u bum
-                g->press_time = SDL_GetTicks();
+                if (nk_button_label(ctx, in->item[i].name))
+                {
+                    g->current_action = &in->item[i]; // fix later  u bum
+                    g->press_time = SDL_GetTicks();
+                }
             }
         }
     }
@@ -203,7 +207,12 @@ int battle_battle(global_state *g)
                 g->n_enemies--;
                 // if they're all dead
                 if (!g->n_enemies)
+                {
+                    battle_load_new_world(g);
+                    strcpy(g->info_out, "YOU WON THE BATTLE, +1 Level and More HP");
+                    player->level++;
                     return FALSE;
+                }
 
                 // erase defeated enemy
                 memmove(&g->cur_enemies[cur_enemy], &g->cur_enemies[cur_enemy + 1], (n_enemies - cur_enemy) * sizeof(monst_inst));
@@ -258,7 +267,7 @@ int battle_battle(global_state *g)
     battle_menu_attack(g, player_inst);
     battle_menu_enemy(g->ctx, enemy_inst);
     battle_menu_item(g);
-    battle_menu_output(g->ctx, g->info_out);
+    // battle_menu_output(g->ctx, g->info_out);
 
     battle_enemies(g);
 
@@ -283,7 +292,7 @@ Character battle_load_character(char *name)
     charJson.sprite = gf2d_sprite_load_image(charJson.sprite_path);
     strcpy(charJson.name, sj_object_get_value_as_string(lj, "name"));
     sj_object_get_value_as_int(lj, "level", &charJson.level);
-    sj_object_get_value_as_int(lj, "hp", &charJson.hp);//dont need to list for enemy, always gets initalized to max hp, only for player
+    sj_object_get_value_as_int(lj, "hp", &charJson.hp); // dont need to list for enemy, always gets initalized to max hp, only for player
     sj_object_get_value_as_int(lj, "max_hp", &charJson.max_hp);
     sj_object_get_value_as_int(lj, "n_attacks", &charJson.n_attacks);
     SJson *attackJson = sj_object_get_value(lj, "attacks");
@@ -295,6 +304,7 @@ Character battle_load_character(char *name)
         sj_object_get_value_as_int(jattack, "min_dam", &charJson.attacks[i].min_dam);
         sj_object_get_value_as_int(jattack, "max_dam", &charJson.attacks[i].max_dam);
     }
+    charJson.max_hp = charJson.max_hp * charJson.level;
     return charJson;
     // slog(charJson.attacks[6].name);
     // slog("%i",testJson.attacks[0].min_dam);
@@ -325,4 +335,14 @@ void battle_save_data_character(char *ipath, Character *chr_save)
     sj_object_insert(dest, "character", charjson);
 
     sj_save(dest, "config/test.json");
+}
+
+void battle_load_new_world(global_state *g)
+{
+    char buf[1024];
+    snprintf(buf, 1024, "config/levels/level%d.json", rand_range(0, 2));
+    level_set_active_level(level_load(buf));
+
+    snprintf(buf, 1024, "config/chests/chest%d.json", rand_range(0, 3));
+    g->chests = level_load(buf);
 }
