@@ -30,7 +30,7 @@ If the above build process does not work, and you are running any linux distro w
 
 # Code Reuse
 Most important pieces are handled in the battle.c/h file that handles most of the turn based combat. If you want to reused feel free to modify the files
-The `./config` folder is where most gameyup 
+The `./config` folder is where most game functions are
 
 # Midterm Deliverables
 
@@ -62,4 +62,4 @@ The `./config` folder is where most gameyup
     - Door
     - Lava Floor
 
-<!---9/10-->
+<!---10/10-->
