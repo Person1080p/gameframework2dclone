@@ -1,14 +1,19 @@
 {
-    "sprite_path": "images/monster/10.png",
-    "name": "Berith",
+    "sprite_path": "images/monster/8.png",
+    "name": "Obariyon",
     "level": 5,
     "max_hp": 300,
-    "n_attacks": 1,
+    "n_attacks": 2,
     "attacks": [
         {
             "name": "Stab",
             "min_dam": 1,
             "max_dam": 110
+        },
+        {
+            "name": "Punch",
+            "min_dam": 20,
+            "max_dam": 50
         }
     ]
 }

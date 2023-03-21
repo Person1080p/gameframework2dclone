@@ -13,8 +13,8 @@ Entity *space_bug_new(Vector2D position)
     if (!ent)return NULL;
     ent->sprite = gf2d_sprite_load_all(
         "images/world_player.png",
-        87,
-        122,
+        112,
+        112,
         16,
         0);
     ent->think = space_bug_think;

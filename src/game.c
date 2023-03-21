@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     /*variable declarations*/
     int done = 0;
     const Uint8 *keys;
-    Entity *ent;
+    
 
     int pause = 0;
     Sprite *background;
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     /*demo setup*/
     background = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
     mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
-    ent = space_bug_new(vector2d(750, 750));
+    g->ent = space_bug_new(vector2d(750, 750));
 
     strcpy(g->info_out, " ");
     battle_load_new_world(g);
@@ -79,10 +79,10 @@ int main(int argc, char *argv[])
     g->n_allies = 1;
 
     char pathbuf[1024];
-    for (int i = 0; i < NUM_ENEMIES; i++)
+    for (int i = 0; i < NUM_MONSTERS; i++)
     {
         snprintf(pathbuf, 1024, "default_enemy/enemy%d.json", i);
-        g->enemies[i] = battle_load_character(pathbuf);
+        g->monsters[i] = battle_load_character(pathbuf);
     }
     g->world_center = vector2d(750, 750);
     /*
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 
         if (g->state == BATTLE)
         {
-            ent->position = g->world_center;
+            g->ent->position = g->world_center;
             if (!battle_battle(g))
             {
                 g->state = MAP;
@@ -159,6 +159,10 @@ int main(int argc, char *argv[])
         else
         {
             level_draw(g->chests);
+            level_draw(g->encounters);
+            level_draw(g->npc);
+            level_draw(g->door);
+            level_draw(g->lava);
             level_draw(level_get_active_level());
             entity_draw_all();
             camera_world_snap();
@@ -203,7 +207,11 @@ int main(int argc, char *argv[])
     // TODO create cleanup function freeing all game state stuff
     level_free(level_get_active_level());
     level_free(g->chests);
-    entity_free(ent);
+    level_free(g->encounters);
+    level_free(g->npc);
+    level_free(g->door);
+    level_free(g->lava);
+    entity_free(g->ent);
 
     nk_sdl_shutdown();
     slog("---==== END ====---");

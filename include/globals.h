@@ -2,18 +2,14 @@
 #define GLOBALS_H
 
 #include "nuklear.h"
-
+#include "entity.h"
 #include "characters.h"
 
 #define TRUE 1
 #define FALSE 0
 
-// Who is the target
-#define PLAYER 0
-#define ENEMY 1
-
 #define TURN_DELAY 2000
-#define NUM_ENEMIES 10
+#define NUM_MONSTERS 10
 #define MAX_BAT_EN 4
 #define MAX_ALLIES 3
 #define IVENTORY_SZ 20
@@ -36,13 +32,13 @@ typedef struct global_state
     int press_time;
     char info_out[1024];
 
-    Character enemies[NUM_ENEMIES];
+    Character monsters[NUM_MONSTERS];
 
     int n_enemies;
     monst_inst cur_enemies[MAX_BAT_EN];
 
     int n_allies;
-    monst_inst allies[1+MAX_ALLIES];
+    monst_inst allies[MAX_ALLIES];
 
     Inventory inventory;
     //int n_items;
@@ -50,6 +46,12 @@ typedef struct global_state
 
     // a "level" of positions of chests
     Level* chests;
+    Level* encounters;
+    Level* npc;
+    Level* door;
+    Level* lava;
+
+    Entity *ent;
 
     Vector2D world_center;
 } global_state;

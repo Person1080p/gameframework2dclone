@@ -5,9 +5,8 @@
 #include <stdlib.h>
 #include "simple_logger.h"
 
-char* event_rand_level(int min, int max);
+char *event_rand_level(int min, int max);
 
-char* event_rand_chest(int min, int max);
-
+char *event_rand_chest(int min, int max);
 
 #endif

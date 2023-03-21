@@ -1,0 +1,19 @@
+{
+    "sprite_path": "images/monster/11.png",
+    "name": "Bicorn",
+    "level": 4,
+    "max_hp": 250,
+    "n_attacks": 1,
+    "attacks": [
+        {
+            "name": "Stab",
+            "min_dam": 1,
+            "max_dam": 110
+        },
+        {
+            "name": "Ram",
+            "min_dam": 30,
+            "max_dam": 60
+        }
+    ]
+}

@@ -11,5 +11,4 @@
  */
 Entity *space_bug_new(Vector2D position);
 
-
 #endif

@@ -1,14 +1,19 @@
 {
-    "sprite_path": "images/monster/2.png",
-    "name": "Pixie",
-    "level": 1,
-    "max_hp": 120,
-    "n_attacks": 1,
+    "sprite_path": "images/monster/0.png",
+    "name": "White Rider",
+    "level": 10,
+    "max_hp": 200,
+    "n_attacks": 2,
     "attacks": [
         {
-            "name": "Tackle",
-            "min_dam": 10,
-            "max_dam": 15
+            "name": "Stab",
+            "min_dam": 1,
+            "max_dam": 110
+        },
+        {
+            "name": "Silver Arrow",
+            "min_dam": 1,
+            "max_dam": 400
         }
     ]
 }

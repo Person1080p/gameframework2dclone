@@ -10,19 +10,19 @@
 typedef struct
 {
     int tileFrame;
-    int solid;  // if true the tile cannot be walked through
-}TileInfo;
+    int solid; // if true the tile cannot be walked through
+} TileInfo;
 
 typedef struct
 {
-    TextLine    name;
-    Sprite     *tileSet;
-    Vector2D    tileSize;    //the width and height of the tile map
-    Vector2D    mapSize;    //the width and height of the tile map
-    int        *tileMap;    //WTF???
-    Sprite     *tileLayer;  //TBD
-    List       *clips;      //list of static shapes to clip against in the game world
-}Level;
+    TextLine name;
+    Sprite *tileSet;
+    Vector2D tileSize; // the width and height of the tile map
+    Vector2D mapSize;  // the width and height of the tile map
+    int *tileMap;      // WTF???
+    Sprite *tileLayer; // TBD
+    List *clips;       // list of static shapes to clip against in the game world
+} Level;
 
 /**
  * @brief get the set active level pointer if it is set

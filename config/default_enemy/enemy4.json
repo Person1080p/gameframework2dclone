@@ -1,14 +1,19 @@
 {
-    "sprite_path": "images/monster/6.png",
+    "sprite_path": "images/monster/4.png",
     "name": "Berith",
     "level": 5,
     "max_hp": 300,
-    "n_attacks": 1,
+    "n_attacks": 2,
     "attacks": [
         {
             "name": "Stab",
             "min_dam": 1,
             "max_dam": 110
+        },
+        {
+            "name": "Fire",
+            "min_dam": 10,
+            "max_dam": 40
         }
     ]
 }

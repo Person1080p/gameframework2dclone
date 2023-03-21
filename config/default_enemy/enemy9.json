@@ -1,14 +1,19 @@
 {
-    "sprite_path": "images/monster/11.png",
-    "name": "Berith",
+    "sprite_path": "images/monster/9.png",
+    "name": "Orobas",
     "level": 5,
     "max_hp": 300,
-    "n_attacks": 1,
+    "n_attacks": 2,
     "attacks": [
         {
             "name": "Stab",
             "min_dam": 1,
             "max_dam": 110
+        },
+        {
+            "name": "Slap",
+            "min_dam": 10,
+            "max_dam": 40
         }
     ]
 }

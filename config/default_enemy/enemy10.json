@@ -1,19 +1,19 @@
 {
-    "sprite_path": "images/monster/6.png",
-    "name": "Jack-o-Lantern",
+    "sprite_path": "images/monster/10.png",
+    "name": "Sudama",
     "level": 2,
-    "max_hp": 300,
+    "max_hp": 100,
     "n_attacks": 2,
     "attacks": [
         {
             "name": "Stab",
             "min_dam": 1,
-            "max_dam": 40
+            "max_dam": 30
         },
         {
-            "name": "Fire",
+            "name": "Poke",
             "min_dam": 10,
-            "max_dam": 30
+            "max_dam": 20
         }
     ]
 }

@@ -18,7 +18,7 @@ void start_battle(global_state *g)
     g->current_action = NULL;
     for (int i = 0; i < MAX_BAT_EN; i++)
     {
-        g->cur_enemies[i].monster = &g->enemies[rand() % NUM_ENEMIES];
+        g->cur_enemies[i].monster = &g->monsters[rand() % NUM_MONSTERS];
         g->cur_enemies[i].hp = g->cur_enemies[i].monster->max_hp;
     }
     g->n_enemies = rand() % MAX_BAT_EN + 1;
@@ -43,12 +43,12 @@ void battle_menu_output(struct nk_context *ctx, char *info_out)
     nk_end(ctx);
 }
 
-void battle_menu_chracter_status(struct nk_context *ctx, monst_inst *inst,int x, int y, char* title)
+void battle_menu_character_status(struct nk_context *ctx, monst_inst *inst, int x, int y, char *title)
 {
     char enemy_status[200];
     Character *c = inst->monster;
 
-    snprintf(enemy_status, 200, "Level %i | HP: %i/%i",c->level, inst->hp, c->max_hp);
+    snprintf(enemy_status, 200, "Level %i | HP: %i/%i", c->level, inst->hp, c->max_hp);
     int flags = NK_WINDOW_BORDER | NK_WINDOW_NO_SCROLLBAR;
     if (nk_begin(ctx, title, nk_rect(x, y, 200, 80), flags))
     {
@@ -183,6 +183,8 @@ int battle_battle(global_state *g)
 
     // also updates cur_enemy/ally
     monst_inst *enemy_inst = &g->cur_enemies[cur_enemy];
+
+    // TODO if not player turn, pick random target for enemy, not cur_ally
     monst_inst *player_inst = &g->allies[cur_ally];
     // cur_enemy = enemy_inst - enemies_inst;
 
@@ -224,27 +226,30 @@ int battle_battle(global_state *g)
                 if (!g->n_allies)
                     return FALSE;
 
-                // TODO game ends if all allies die?  if not we need
-                // a separate array
+                // TODO game ends if all allies die
                 memmove(&g->allies[cur_ally], &g->allies[cur_ally + 1], (n_allies - cur_ally) * sizeof(monst_inst));
             }
         }
-        else
+
+        if (g->turn == PLAYER_TURN)
         {
-            if (!died || g->turn == PLAYER)
+            g->cur_ally++;
+            if (g->cur_ally == n_allies)
             {
-                g->cur_ally++;
-                g->cur_ally %= n_allies;
+                g->turn = !g->turn;
             }
-            if (!died || g->turn == ENEMY)
+            g->cur_ally %= n_allies;
+        }
+        else
+        { // if (g->turn == ENEMY_TURN)
+            g->cur_enemy++;
+            if (g->cur_enemy == n_enemies)
             {
-                g->cur_enemy++;
-                g->cur_enemy %= n_enemies;
+                g->turn = !g->turn;
             }
+            g->cur_enemy %= n_enemies;
         }
         g->current_action = NULL;
-
-        g->turn = !g->turn;
 
         slog(g->info_out);
         g->press_time = cur_time;
@@ -254,8 +259,7 @@ int battle_battle(global_state *g)
         // if player is target, choose enemy attack
         if (g->turn == ENEMY_TURN)
         {
-            // TODO pick random attack
-            g->current_action = &enemy->attacks[0];
+            g->current_action = &enemy->attacks[rand_range(0, enemy->n_attacks)];
         }
         else
         {
@@ -264,27 +268,27 @@ int battle_battle(global_state *g)
         }
     }
     char winbuf[1024];
-    for(int i=0;i<g->n_enemies;i++){
-        snprintf(winbuf,1024,"enemytitle%i",i);
-        battle_menu_chracter_status(g->ctx, &g->cur_enemies[i],(400+200*i),200,winbuf);
-        gf2d_sprite_draw_image( g->cur_enemies[i].monster->sprite, vector2d((300+200*i), -150));
-       
+    for (int i = 0; i < g->n_enemies; i++)
+    {
+        snprintf(winbuf, 1024, "enemytitle%i", i);
+        battle_menu_character_status(g->ctx, &g->cur_enemies[i], (400 + 200 * i), 200, winbuf);
+        gf2d_sprite_draw_image(g->cur_enemies[i].monster->sprite, vector2d((300 + 200 * i), -150));
     }
-    for(int i=0;i<g->n_allies;i++){
-        snprintf(winbuf,1024,"allytitle%i",i);
-        battle_menu_chracter_status(g->ctx, &g->allies[i],(100+200*i),400,winbuf);
-        gf2d_sprite_draw_image( g->allies[i].monster->sprite, vector2d((0+200*i), 0));
+    for (int i = 0; i < g->n_allies; i++)
+    {
+        snprintf(winbuf, 1024, "allytitle%i", i);
+        battle_menu_character_status(g->ctx, &g->allies[i], (100 + 200 * i), 400, winbuf);
+        gf2d_sprite_draw_image(g->allies[i].monster->sprite, vector2d((0 + 200 * i), 0));
         // gf2d_sprite_draw_image(player->sprite, vector2d(0, 0));
     }
     // gf2d_sprite_draw_image(enemy->sprite, vector2d(700, -150));
     battle_menu_attack(g, player_inst);
-    
+
     battle_menu_item(g);
     // battle_menu_output(g->ctx, g->info_out);
 
     battle_enemies(g);
 
-    // TODO move out to main
     nk_sdl_render(NK_ANTI_ALIASING_ON);
     return TRUE;
 }
@@ -330,7 +334,6 @@ Character battle_load_character(char *name)
 //     return num;
 // }
 
-// TODO still 1/2 broken, gotta fix
 void battle_save_data_character(char *ipath, Character *chr_save)
 {
     char path[512];
@@ -340,7 +343,7 @@ void battle_save_data_character(char *ipath, Character *chr_save)
     SJson *dest = sj_copy(source);
     SJson *char_level;
 
-    char_level = sj_new_int(chr_save->level+1);
+    char_level = sj_new_int(chr_save->level + 1);
     sj_object_delete_key(dest, "level");
     sj_object_insert(dest, "level", char_level);
 
@@ -349,10 +352,31 @@ void battle_save_data_character(char *ipath, Character *chr_save)
 
 void battle_load_new_world(global_state *g)
 {
+    // if(level_get_active_level())
+    // {
+    // level_free(level_get_active_level());
+    // level_free(g->chests);
+    // level_free(g->encounters);
+    // level_free(g->npc);
+    // }
+    Vector2D pos = vector2d(750, 750);
+    g->ent->position = pos;
     char buf[1024];
     snprintf(buf, 1024, "config/levels/level%d.json", rand_range(0, 2));
     level_set_active_level(level_load(buf));
 
     snprintf(buf, 1024, "config/chests/chest%d.json", rand_range(0, 3));
     g->chests = level_load(buf);
+
+    snprintf(buf, 1024, "config/enco/enco%d.json", rand_range(0, 3));
+    g->encounters = level_load(buf);
+
+    snprintf(buf, 1024, "config/npc/npc%d.json", rand_range(0, 3));
+    g->npc = level_load(buf);
+
+    snprintf(buf, 1024, "config/door/door%d.json", rand_range(0, 3));
+    g->door = level_load(buf);
+
+    snprintf(buf, 1024, "config/lava/lava%d.json", rand_range(0, 3));
+    g->lava = level_load(buf);
 }

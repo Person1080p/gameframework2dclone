@@ -50,12 +50,16 @@ The `./config` folder is where most gameyup
 - Turn Based Combat System
     - Done
 - 10 recruitable monsters
--   Monsters exist in json and art, not yet recruitable
+    - Done, hit a chest for new ally
 - Player Upgrade System (working)
     - Done, player level up system adding additional max hp
 - Tile based world that is randomly generated
     - Done, selected randomly from existing maps files to combine to a new map
 - 5 In-world Interactables (NPC's, Chests, etc.)
     - Chests
+    - Encounters
+    - NPC
+    - Door
+    - Lava Floor
 
-<!---7/10-->
+<!---9/10-->

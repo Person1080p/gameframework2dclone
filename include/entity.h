@@ -11,25 +11,25 @@
 
 typedef struct Entity_S
 {
-    Bool    _inuse;
+    Bool _inuse;
     Sprite *sprite;
-    float   frame;
-    float   rotation;
-    float   speed;
+    float frame;
+    float rotation;
+    float speed;
     Vector2D drawOffset;
-    
-    Shape shape;    //collision shape
-    
+
+    Shape shape; // collision shape
+
     Vector2D position;
     Vector2D velocity;
     Vector2D acceleration;
-    
+
     void (*think)(struct Entity_S *self);
     int (*update)(struct Entity_S *self);
     void (*draw)(struct Entity_S *self);
-    void (*free_entity)(struct Entity_S *self);//cleanup of custom data if defined
+    void (*free_entity)(struct Entity_S *self); // cleanup of custom data if defined
     void *data;
-}Entity;
+} Entity;
 
 /**
  * @brief initialize the internal manager for the entity system
@@ -85,6 +85,5 @@ Shape entity_get_shape(Entity *ent);
 Shape entity_get_shape_after_move(Entity *ent);
 
 void entity_animate(Entity *ent, float frame_start, float frame_final);
-
 
 #endif

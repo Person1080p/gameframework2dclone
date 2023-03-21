@@ -14,25 +14,25 @@ enum
     NUM_MESSAGES
 };
 
-extern char* Messages[];
+extern char *Messages[];
 
-void start_battle(global_state* g);
+void start_battle(global_state *g);
 
 void battle_menu_output(struct nk_context *ctx, char *info_out);
 
-void battle_menu_chracter_status(struct nk_context *ctx, monst_inst *inst,int x, int y, char* title);
+void battle_menu_chracter_status(struct nk_context *ctx, monst_inst *inst, int x, int y, char *title);
 
-void battle_menu_attack(global_state* g, monst_inst* inst);
+void battle_menu_attack(global_state *g, monst_inst *inst);
 
-void battle_menu_item(global_state* g);
+void battle_menu_item(global_state *g);
 
 int battle_action_rng(int max, int min);
 
-int battle_action_dmg(global_state* g, monst_inst *target);
+int battle_action_dmg(global_state *g, monst_inst *target);
 
-int battle_battle(global_state* g);
+int battle_battle(global_state *g);
 
-void battle_enemies(global_state* g);
+void battle_enemies(global_state *g);
 
 /// @brief loads a character (enemy or ally) from a json file
 /// @param name path to character json relative to config folder

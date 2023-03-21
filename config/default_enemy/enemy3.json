@@ -1,14 +1,19 @@
 {
-    "sprite_path": "images/monster/5.png",
-    "name": "Berith",
-    "level": 5,
-    "max_hp": 300,
-    "n_attacks": 1,
+    "sprite_path": "images/monster/3.png",
+    "name": "Hua Po",
+    "level": 3,
+    "max_hp": 60,
+    "n_attacks": 2,
     "attacks": [
         {
-            "name": "Stab",
-            "min_dam": 1,
-            "max_dam": 110
+            "name": "Hit",
+            "min_dam": 5,
+            "max_dam": 30
+        },
+        {
+            "name": "Fire",
+            "min_dam": 10,
+            "max_dam": 40
         }
     ]
 }

@@ -26,11 +26,9 @@ typedef struct Character
 // rename char instance?
 typedef struct monst_inst
 {
-    Character* monster;
+    Character *monster;
     int hp;
 } monst_inst;
-
-
 
 typedef struct Inventory
 {
