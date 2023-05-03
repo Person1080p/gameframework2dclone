@@ -1,5 +1,6 @@
 #!/bin/bash
 # Get Submodules
+rm -rf gfc
 git clone https://github.com/engineerOfLies/gfc.git
 cd gfc
 git clone https://github.com/engineerOfLies/simple_json.git
