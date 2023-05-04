@@ -25,17 +25,18 @@ enum
 
 global_state *g;
 
+void pause_menu(global_state *g);
+
 int main(int argc, char *argv[])
 {
     global_state mystate;
     g = &mystate;
+    g->state = MENU;
+    g->old_state = MAP;
 
     /*variable declarations*/
-    int done = 0;
     const Uint8 *keys;
-    
 
-    int pause = 0;
     Sprite *background;
     // gme_entity_init(1024);
     entity_manager_init(1024);
@@ -63,7 +64,8 @@ int main(int argc, char *argv[])
     SDL_ShowCursor(SDL_DISABLE);
 
     g->ctx = gf2d_nuklear_init();
-    SDL_Event evt;
+    SDL_Event e;
+    int sc = e.key.keysym.scancode;
 
     /*demo setup*/
     background = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
@@ -104,22 +106,44 @@ int main(int argc, char *argv[])
     //     16,
     //     0);
 
-    while (!done)
+    while (g->state != EXIT)
     {
 
         nk_input_begin(g->ctx);
-        while (SDL_PollEvent(&evt))
+        while (SDL_PollEvent(&e))
         {
-            if (evt.type == SDL_QUIT)
+            if (e.type == SDL_QUIT)
             {
-                done = 1;
+                g->state = EXIT;
                 break;
             }
-            nk_sdl_handle_event(&evt);
+            if (e.type == SDL_KEYUP)
+            {
+                sc = e.key.keysym.scancode;
+                switch (sc)
+                {
+                case SDL_SCANCODE_ESCAPE:
+                    if (g->state == MAP || g->state == BATTLE)
+                    {
+                        g->old_state = g->state;
+                        g->state = MENU;
+                    }
+                    else if (g->state == MENU)
+                    {
+                        g->state = EXIT;
+                    }
+                    break;
+                case SDL_SCANCODE_O:
+                    battle_load_new_world(g);
+                    break;
+                }
+            }
+            nk_sdl_handle_event(&e);
         }
         nk_input_end(g->ctx);
 
-        SDL_PumpEvents(); // update SDL's internal event structures
+        // SDL_PumpEvents(); // update SDL's internal event structures
+
         /*handle keyboard and mouse events here*/
         keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
         /*update things here*/
@@ -138,7 +162,7 @@ int main(int argc, char *argv[])
         gf2d_sprite_draw_image(background, vector2d(0, 0));
         // contents next
         // UI elements last
-        if (!g->state && keys[SDL_SCANCODE_P])
+        if (g->state == MAP && keys[SDL_SCANCODE_P])
         {
             start_battle(g);
         }
@@ -156,7 +180,7 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        else
+        else if (g->state == MAP)
         {
             level_draw(g->chests);
             level_draw(g->encounters);
@@ -166,7 +190,17 @@ int main(int argc, char *argv[])
             level_draw(level_get_active_level());
             entity_draw_all();
             camera_world_snap();
+
+            if (keys[SDL_SCANCODE_P])
+            {
+                start_battle(g);
+            }
         }
+        else if (g->state == MENU)
+        {
+            pause_menu(g);
+        }
+
         battle_menu_output(g->ctx, g->info_out);
         nk_sdl_render(NK_ANTI_ALIASING_ON);
         gf2d_sprite_draw(
@@ -185,23 +219,6 @@ int main(int argc, char *argv[])
         // slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
         // slog("Mouse at %i , %i",mx,my);
         // slog("Char at %f , %f",ent->position.x,ent->position.y);
-        if ((pause == 0) && (keys[SDL_SCANCODE_ESCAPE]))
-        {
-            // pause = 1;
-            done = 1; // exit condition
-            slog("%i", pause);
-        }
-        if (keys[SDL_SCANCODE_O])
-        {
-            battle_load_new_world(g);
-        }
-
-        // if(pause == 1)
-        // {
-        //     if ((keys[SDL_SCANCODE_ESCAPE]))
-        //         pause = 0;
-        //     slog("%i",pause);
-        // }
     }
 
     // TODO create cleanup function freeing all game state stuff
@@ -216,6 +233,40 @@ int main(int argc, char *argv[])
     nk_sdl_shutdown();
     slog("---==== END ====---");
     return 0;
+}
+
+void pause_menu(global_state *g)
+{
+    struct nk_context *ctx = g->ctx;
+    int flags = NK_WINDOW_BORDER;
+    int alignment = NK_TEXT_CENTERED;
+
+    if (nk_begin(ctx, "Main Menu", nk_rect(10, 500, 200, 200), flags))
+    {
+        nk_layout_row_dynamic(ctx, 30, 1);
+
+        nk_label(ctx, "Main Menu", alignment);
+
+        // Start/Resume
+        if (nk_button_label(ctx, "Resume"))
+        {
+            g->state = g->old_state;
+        }
+
+        /*
+        // settings/controls
+        if (nk_button_label(ctx, ))
+        {
+
+        }
+        */
+
+        if (nk_button_label(ctx, "Exit"))
+        {
+            g->state = EXIT;
+        }
+    }
+    nk_end(ctx);
 }
 
 /*eol@eof*/

@@ -14,7 +14,7 @@
 #define MAX_ALLIES 3
 #define IVENTORY_SZ 20
 
-enum { MAP, BATTLE };
+enum { EXIT, MAP, BATTLE, MENU };
 enum { PLAYER_TURN, ENEMY_TURN };
 
 #include "level.h"
@@ -25,6 +25,7 @@ typedef struct global_state
     int fullscreen_gui;
 
     int state;
+    int old_state;
     int turn;
     int cur_ally, cur_enemy;
 

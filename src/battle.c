@@ -296,8 +296,8 @@ int battle_battle(global_state *g)
     for (int i = 0; i < g->n_allies; i++)
     {
         snprintf(winbuf, 1024, "allytitle%i", i);
-        battle_menu_character_status(g->ctx, &g->allies[i], (100 + 200 * i), 400, winbuf);
-        gf2d_sprite_draw_image(g->allies[i].monster->sprite, vector2d((0 + 200 * i), 0));
+        battle_menu_character_status(g->ctx, &g->allies[i], (400 + 200 * i), 400, winbuf);
+        gf2d_sprite_draw_image(g->allies[i].monster->sprite, vector2d((300 + 200 * i), 0));
         // gf2d_sprite_draw_image(player->sprite, vector2d(0, 0));
     }
     // gf2d_sprite_draw_image(enemy->sprite, vector2d(700, -150));
