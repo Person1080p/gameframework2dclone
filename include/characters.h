@@ -48,9 +48,9 @@ typedef struct monst_inst
 
 typedef struct Inventory
 {
-    int num_item;
-    Action item[20];
-    // add item amounts
+    int num_items;
+    int item_counts[20];
+    Action items[20];
 } Inventory;
 
 #endif

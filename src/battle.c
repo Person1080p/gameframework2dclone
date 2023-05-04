@@ -130,24 +130,42 @@ void battle_menu_item(global_state *g)
     int flags = NK_WINDOW_BORDER;
     struct nk_context *ctx = g->ctx;
     Inventory *in = &g->inventory;
+    float ratios[] = { 0.1f, 0.9f };
+    int clicked = -1;
+
+    int n_items = in->num_items;
+
+    char cnt_str[10];
     if (nk_begin(ctx, "top 2", nk_rect(300, 500, 200, 200), flags))
     {
         nk_layout_row_dynamic(ctx, 30, 1);
 
         nk_label(ctx, "ITEMS", NK_TEXT_LEFT);
+        nk_layout_row(ctx, NK_DYNAMIC, 0, 2, ratios);
         if (!g->turn)
         {
-            for (int i = 0; i < in->num_item; i++)
+            for (int i = 0; i < n_items; i++)
             {
-                if (nk_button_label(ctx, in->item[i].name))
+                snprintf(cnt_str, 10, "%d", in->item_counts[i]);
+                nk_label(ctx, cnt_str, NK_TEXT_LEFT);
+                if (nk_button_label(ctx, in->items[i].name))
                 {
-                    g->current_action = &in->item[i]; // fix later  u bum
+                    g->current_action = &in->items[i];
                     g->press_time = SDL_GetTicks();
+                    in->item_counts[i]--;
+                    clicked = i;
                 }
             }
         }
     }
     nk_end(ctx);
+
+    // If count is 0, remove from inventory
+    if (clicked >= 0 && !in->item_counts[clicked]) {
+        memmove(&in->items[clicked], &in->items[clicked+1], (n_items-clicked-1)*sizeof(Action));
+        memmove(&in->item_counts[clicked], &in->item_counts[clicked+1], (n_items-clicked-1)*sizeof(int));
+        in->num_items--;
+    }
 }
 
 /// @brief true = lethal, false is not
@@ -438,7 +456,7 @@ void battle_load_new_world(global_state *g)
     Vector2D pos = vector2d(750, 750);
     g->ent->position = pos;
     char buf[1024];
-    snprintf(buf, 1024, "config/levels/level%d.json", rand_range(0, 2));
+    snprintf(buf, 1024, "config/levels/level%d.json", rand_range(0, 5));
     level_set_active_level(level_load(buf));
 
     snprintf(buf, 1024, "config/chests/chest%d.json", rand_range(0, 3));

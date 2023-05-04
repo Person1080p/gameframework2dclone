@@ -85,6 +85,7 @@ The `./config` folder is where most game functions are
 - Monster Fusion
     - Incomplete
 - Items (Consumables, 10 Consumables), (Damage, heal, new ability)
-    - Incomplete
+    - Done
 - Ability Affinities (Fire, water, weak, strong)
     - Done
+<!---6/10-->

@@ -108,8 +108,27 @@ int main(int argc, char *argv[])
     g->Inventory[0] = {"Heal", -30, -30};
     g->Inventory[1] = {"Fire", 20, 30};
     */
-    g->inventory = (Inventory){2, {{"Heal", -30, -30}, {"Fire", 20, 30}}};
+    Inventory myinventory =
+    {
+        .num_items = 10,
+        .item_counts = { 3 ,4,3 ,4,3 ,4,3 ,4,4,2},
+        .items = {
+            {"Fire", 20, 30, FIRE},
+            {"Ice", 20, 30, ICE},
+            {"Almighty", 20, 30, NONE},
+            {"Air", 20, 30, AIR},
+            {"Electric", 20, 30, ELECTRIC},
+            {"Earth", 20, 30, EARTH},
+            {"Water", 20, 30, WATER},
+            {"Light", 20, 30, LIGHT},
+            {"Dark", 20, 30, DARK},
+            {"Big Fire", 40, 60, FIRE}
+        
+        }
+    };
 
+    // memcpy
+    g->inventory = myinventory;
     // battle_save_data_character("player_data/player.json", &Player);
 
     slog(Player.attacks[6].name);
