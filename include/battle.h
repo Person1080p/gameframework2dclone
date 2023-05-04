@@ -45,4 +45,8 @@ void battle_save_data_character(char *ipath, Character *chr_save);
 
 void battle_load_new_world(global_state *g);
 
+int get_type(const char* s);
+
+char* get_type_str(int type);
+
 #endif

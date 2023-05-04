@@ -4,16 +4,20 @@
     "level": 3,
     "max_hp": 120,
     "n_attacks": 2,
+    "strong" : "ICE",
+    "weak" : "FIRE",
     "attacks": [
         {
             "name": "Punch",
             "min_dam": 10,
-            "max_dam": 15
+            "max_dam": 15,
+            "type" : "NONE"
         },
         {
-            "name": "Bufu",
+            "name": "Ice Blast",
             "min_dam": 10,
-            "max_dam": 35
+            "max_dam": 35,
+            "type" : "ICE"
         }
     ]
 }

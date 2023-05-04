@@ -4,16 +4,20 @@
     "level": 10,
     "max_hp": 200,
     "n_attacks": 2,
+    "strong" : "LIGHT",
+    "weak" : "DARK",
     "attacks": [
         {
             "name": "Stab",
             "min_dam": 1,
-            "max_dam": 110
+            "max_dam": 110,
+            "type" : "NONE"
         },
         {
             "name": "Silver Arrow",
             "min_dam": 1,
-            "max_dam": 400
+            "max_dam": 400,
+            "type" : "LIGHT"
         }
     ]
 }

@@ -4,16 +4,20 @@
     "level": 3,
     "max_hp": 200,
     "n_attacks": 2,
+    "strong" : "EARTH",
+    "weak" : "WATER",
     "attacks": [
         {
             "name": "Stab",
             "min_dam": 1,
-            "max_dam": 110
+            "max_dam": 110,
+            "type" : "NONE"
         },
         {
-            "name": "Fire",
+            "name": "Rock Toss",
             "min_dam": 10,
-            "max_dam": 50
+            "max_dam": 50,
+            "type" : "EARTH"
         }
     ]
 }

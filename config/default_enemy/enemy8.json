@@ -4,6 +4,8 @@
     "level": 5,
     "max_hp": 300,
     "n_attacks": 2,
+    "strong" : "AIR",
+    "weak" : "EARTH",
     "attacks": [
         {
             "name": "Stab",
@@ -11,9 +13,10 @@
             "max_dam": 110
         },
         {
-            "name": "Punch",
+            "name": "Gust",
             "min_dam": 20,
-            "max_dam": 50
+            "max_dam": 50,
+            "type":"AIR"
         }
     ]
 }

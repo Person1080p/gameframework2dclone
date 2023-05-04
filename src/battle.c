@@ -47,6 +47,9 @@ void battle_menu_character_status(struct nk_context *ctx, monst_inst *inst, int 
 {
     char enemy_status[200];
     Character *c = inst->monster;
+    char name_line[200];
+
+    snprintf(name_line, 200, "%s STR:%s WK:%s", c->name, get_type_str(c->strong), get_type_str(c->weak));
 
     snprintf(enemy_status, 200, "Level %i | HP: %i/%i", c->level, inst->hp, c->max_hp);
     int flags = NK_WINDOW_BORDER | NK_WINDOW_NO_SCROLLBAR;
@@ -54,7 +57,7 @@ void battle_menu_character_status(struct nk_context *ctx, monst_inst *inst, int 
     {
         nk_layout_row_dynamic(ctx, 30, 1);
 
-        nk_label(ctx, c->name, NK_TEXT_LEFT);
+        nk_label(ctx, name_line, NK_TEXT_LEFT);
 
         nk_label(ctx, enemy_status, NK_TEXT_LEFT);
     }
@@ -89,13 +92,16 @@ void battle_menu_attack(global_state *g, monst_inst *inst)
     struct nk_context *ctx = g->ctx;
     int flags = NK_WINDOW_BORDER | NK_WINDOW_NO_SCROLLBAR;
 
-    char ally_status[200];
     Character *c = inst->monster;
-    if (nk_begin(ctx, "top 1", nk_rect(10, 500, 200, 200), flags))
-    {
-        nk_layout_row_dynamic(ctx, 30, 1);
+    char name_line[200];
+    snprintf(name_line, 200, "%s STR:%s WK:%s", c->name, get_type_str(c->strong), get_type_str(c->weak));
 
-        nk_label(ctx, c->name, NK_TEXT_LEFT);
+    char ally_status[200];
+    if (nk_begin(ctx, "top 1", nk_rect(10, 400, 200, 300), flags))
+    {
+        nk_layout_row_dynamic(ctx, 0, 1);
+
+        nk_label(ctx, name_line, NK_TEXT_LEFT);
 
         snprintf(ally_status, 200, "Level %i | HP: %i/%i", c->level, inst->hp, c->max_hp);
         nk_label(ctx, ally_status, NK_TEXT_LEFT);
@@ -107,7 +113,6 @@ void battle_menu_attack(global_state *g, monst_inst *inst)
             {
                 if (nk_button_label(ctx, c->attacks[i].name)) // render all buttons, and on button press do if statement
                 {
-                    // {
                     g->current_action = &c->attacks[i];
                     g->press_time = SDL_GetTicks();
                 }
@@ -150,13 +155,27 @@ int battle_action_dmg(global_state *g, monst_inst *target)
 {
     Action *act = g->current_action;
     int damage = rand_range(act->min_dam, act->max_dam);
-    slog("%s DID THIS %i", act->name, damage);
+    char* modifier = "";
+    // handle character/attack categories/affinities
+    if (act->type != NONE) {
+        if (target->monster->strong == act->type) {
+            slog("Hit Resistance");
+            modifier = "[RESIST]";
+            damage /= 2;
+        } else if (target->monster->weak == act->type) {
+            slog("Hit Weakness");
+            modifier = "[WEAK]";
+            damage *= 2;
+        }
+    }
+
+    slog("%s DID THIS %i %s", act->name, damage,modifier);
     target->hp -= damage;
     slog("ENEMY HP%i", target->hp);
 
     Character *c = target->monster;
 
-    snprintf(g->info_out, 1024, "%s just took %d damage", c->name, damage);
+    snprintf(g->info_out, 1024, "%s just took %d damage %s", c->name, damage,modifier);
 
     if (target->hp <= 0)
     {
@@ -293,6 +312,52 @@ int battle_battle(global_state *g)
     return TRUE;
 }
 
+int get_type(const char* s)
+{
+    if (!s) {
+        return NONE;
+    }
+    const char* type[] = {
+        "NONE",
+        "FIRE",
+        "ICE",
+        "AIR",
+        "ELECTRIC",
+        "EARTH",
+        "WATER",
+        "LIGHT",
+        "DARK"
+    };
+    for (int i=0; i<NUM_TYPES; i++) {
+        if (!strcmp(type[i], s)) {
+            return i;
+        }
+    }
+
+    return NONE;
+}
+
+char* get_type_str(int type)
+{
+    const char* type_strs[] = {
+        "NONE",
+        "FIRE",
+        "ICE",
+        "AIR",
+        "ELECTRIC",
+        "EARTH",
+        "WATER",
+        "LIGHT",
+        "DARK"
+    };
+
+    if (type < 0 || type >= NUM_TYPES) {
+        type = 0;
+    }
+
+    return type_strs[type];
+}
+
 Character battle_load_character(char *name)
 {
     SJson *lj;
@@ -312,6 +377,10 @@ Character battle_load_character(char *name)
     sj_object_get_value_as_int(lj, "hp", &charJson.hp); // dont need to list for enemy, always gets initalized to max hp, only for player
     sj_object_get_value_as_int(lj, "max_hp", &charJson.max_hp);
     sj_object_get_value_as_int(lj, "n_attacks", &charJson.n_attacks);
+
+    charJson.strong = get_type(sj_object_get_value_as_string(lj, "strong"));
+    charJson.weak = get_type(sj_object_get_value_as_string(lj, "weak"));
+
     SJson *attackJson = sj_object_get_value(lj, "attacks");
     for (int i = 0; i < charJson.n_attacks; i++)
     {
@@ -320,6 +389,8 @@ Character battle_load_character(char *name)
         strcpy(charJson.attacks[i].name, sj_object_get_value_as_string(jattack, "name"));
         sj_object_get_value_as_int(jattack, "min_dam", &charJson.attacks[i].min_dam);
         sj_object_get_value_as_int(jattack, "max_dam", &charJson.attacks[i].max_dam);
+
+        charJson.attacks[i].type = get_type(sj_object_get_value_as_string(jattack, "type"));
     }
     charJson.max_hp = charJson.max_hp * charJson.level;
     return charJson;

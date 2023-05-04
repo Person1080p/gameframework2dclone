@@ -3,12 +3,26 @@
 
 #include "gf2d_sprite.h"
 
+enum {
+	NONE,
+	FIRE,
+	ICE,
+	AIR,
+	ELECTRIC,
+	EARTH,
+	WATER,
+	LIGHT,
+	DARK,
+	NUM_TYPES
+};
+
 /// @brief Used for Both Abilities and Damage
 typedef struct Action
 {
     char name[20];
     int min_dam;
     int max_dam;
+    int type;
 } Action;
 
 typedef struct Character
@@ -21,6 +35,8 @@ typedef struct Character
     int max_hp;
     int n_attacks;
     Action attacks[7];
+    int weak;
+    int strong;
 } Character;
 
 // rename char instance?

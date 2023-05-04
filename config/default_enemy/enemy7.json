@@ -4,16 +4,20 @@
     "level": 6,
     "max_hp": 200,
     "n_attacks": 2,
+    "strong" : "LIGHT",
+    "weak" : "DARK",
     "attacks": [
         {
             "name": "Stab",
             "min_dam": 1,
-            "max_dam": 40
+            "max_dam": 40,
+            "type" : "NONE"
         },
         {
             "name": "Stare",
             "min_dam": 10,
-            "max_dam": 35
+            "max_dam": 35,
+            "type" : "LIGHT"
         }
     ]
 }

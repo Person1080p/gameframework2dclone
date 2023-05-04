@@ -4,16 +4,22 @@
     "level": 3,
     "max_hp": 60,
     "n_attacks": 2,
+    "strong" : "FIRE",
+    "weak" : "ICE",
     "attacks": [
         {
             "name": "Hit",
             "min_dam": 5,
-            "max_dam": 30
+            "max_dam": 30,
+            "type" : "NONE"
+
         },
         {
             "name": "Fire",
             "min_dam": 10,
-            "max_dam": 40
+            "max_dam": 40,
+            "type" : "FIRE"
+
         }
     ]
 }

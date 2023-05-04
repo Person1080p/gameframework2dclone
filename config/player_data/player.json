@@ -1,8 +1,54 @@
-{"sprite_path":"images/monster/player.png","name":"Player","hp":1932,"max_hp":400,"n_attacks":7,"attacks":[{"name":"Punch","min_dam":10,"max_dam":15
-                },{"name":"Gaea Rage","min_dam":300,"max_dam":500
-                },{"name":"Freikugel","min_dam":5000,"max_dam":6000
-                },{"name":"Burn","min_dam":10,"max_dam":60
-                },{"name":"Fire4","min_dam":10,"max_dam":30
-                },{"name":"Fire5","min_dam":10,"max_dam":30
-                },{"name":"Fire6","min_dam":10,"max_dam":30
-                }],"level":5}
+{
+    "sprite_path": "images/monster/player.png",
+    "name": "Player",
+    "hp": 1932,
+    "max_hp": 400,
+    "n_attacks": 7,
+    "strong": "LIGHT",
+    "weak": "DARK",
+    "attacks": [
+        {
+            "name": "Punch",
+            "min_dam": 10,
+            "max_dam": 15,
+            "type": "ELECTRIC"
+        },
+        {
+            "name": "Gaea Rage",
+            "min_dam": 300,
+            "max_dam": 500,
+            "type": "ICE"
+        },
+        {
+            "name": "Freikugel",
+            "min_dam": 5000,
+            "max_dam": 6000,
+            "type": "WATER"
+        },
+        {
+            "name": "Burn",
+            "min_dam": 10,
+            "max_dam": 60,
+            "type": "FIRE"
+        },
+        {
+            "name": "Fire4",
+            "min_dam": 10,
+            "max_dam": 30,
+            "type": "FIRE"
+        },
+        {
+            "name": "Fire5",
+            "min_dam": 10,
+            "max_dam": 30,
+            "type": "FIRE"
+        },
+        {
+            "name": "Fire6",
+            "min_dam": 10,
+            "max_dam": 30,
+            "type": "FIRE"
+        }
+    ],
+    "level": 6
+}

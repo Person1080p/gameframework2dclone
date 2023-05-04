@@ -87,4 +87,4 @@ The `./config` folder is where most game functions are
 - Items (Consumables, 10 Consumables), (Damage, heal, new ability)
     - Incomplete
 - Ability Affinities (Fire, water, weak, strong)
-    - Incomplete
+    - Done

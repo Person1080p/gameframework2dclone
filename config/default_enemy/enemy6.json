@@ -4,6 +4,8 @@
     "level": 2,
     "max_hp": 300,
     "n_attacks": 2,
+    "strong" : "FIRE",
+    "weak" : "ICE",
     "attacks": [
         {
             "name": "Stab",

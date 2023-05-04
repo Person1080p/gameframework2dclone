@@ -4,16 +4,20 @@
     "level": 1,
     "max_hp": 120,
     "n_attacks": 2,
+    "strong" : "DARK",
+    "weak" : "LIGHT",
     "attacks": [
         {
             "name": "Tackle",
             "min_dam": 10,
-            "max_dam": 15
+            "max_dam": 15,
+            "type" : "NONE"
         },
         {
             "name": "Charm",
             "min_dam": 10,
-            "max_dam": 40
+            "max_dam": 40,
+            "type" : "DARK"
         }
     ]
 }
