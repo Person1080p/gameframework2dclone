@@ -17,6 +17,8 @@
 enum { EXIT, MAP, BATTLE, MENU };
 enum { PLAYER_TURN, ENEMY_TURN };
 
+#include "sound.h"
+
 #include "level.h"
 
 typedef struct global_state
@@ -55,6 +57,12 @@ typedef struct global_state
     Entity *ent;
 
     Vector2D world_center;
+
+    Mix_Chunk* sounds[NUM_SOUNDS];
+    int music_vol;
+    int sound_effect_vol;
+
+
 } global_state;
 
 #endif

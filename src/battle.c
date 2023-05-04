@@ -3,6 +3,7 @@
 #include "gf2d_graphics.h"
 #include "battle.h"
 #include "utils.h"
+#include "sound.h"
 
 char *Messages[] =
     {
@@ -30,6 +31,8 @@ void start_battle(global_state *g)
     g->press_time = SDL_GetTicks();
     // TODO
     strcpy(g->info_out, "Heated battle");
+
+    play_music(g->sounds[BATTLE_MUS], 0);
 }
 
 void battle_menu_output(struct nk_context *ctx, char *info_out)
@@ -168,6 +171,7 @@ int battle_action_dmg(global_state *g, monst_inst *target)
             damage *= 2;
         }
     }
+    play_sound(g->sounds[ATTACK], 0);
 
     slog("%s DID THIS %i %s", act->name, damage,modifier);
     target->hp -= damage;
@@ -179,6 +183,7 @@ int battle_action_dmg(global_state *g, monst_inst *target)
 
     if (target->hp <= 0)
     {
+        play_sound(g->sounds[DEATH], 500);
         slog("%s has died", c->name);
         return TRUE;
     }

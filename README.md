@@ -67,9 +67,9 @@ The `./config` folder is where most game functions are
 
 ## Common Deliverables
 - Contained Game Experience
-    - Incomplete
+    - Done
 - Audio
-    - Incomplete
+    - Done
 - Research Component - Procedurely Generated Levels
     - Done
 - Content Editor - Level Editor

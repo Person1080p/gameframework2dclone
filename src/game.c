@@ -1,4 +1,6 @@
 #include <SDL.h>
+#include "sound.h"
+
 #include "simple_logger.h"
 #include "simple_json.h"
 #include "gf2d_graphics.h"
@@ -65,7 +67,21 @@ int main(int argc, char *argv[])
 
     g->ctx = gf2d_nuklear_init();
     SDL_Event e;
-    int sc = e.key.keysym.scancode;
+    int sc;
+
+    g->music_vol = 20;
+    g->sound_effect_vol = 50;
+
+    /* initialize sdl mixer, open up the audio device, stereo with 1024 byte chunksize per sample */
+    if (Mix_OpenAudio(DSP_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024) < 0)
+    {
+        printf("Mix_OpenAudio error: %s %s\n", Mix_GetError(), SDL_GetError());
+        Mix_CloseAudio();
+        return -1;
+    }
+    load_sounds(50);
+
+    play_music(g->sounds[WORLD_MUS], 0);
 
     /*demo setup*/
     background = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
@@ -127,6 +143,11 @@ int main(int argc, char *argv[])
                     {
                         g->old_state = g->state;
                         g->state = MENU;
+
+                        if (g->old_state == BATTLE)
+                        {
+                            play_music(g->sounds[WORLD_MUS], 0);
+                        }
                     }
                     else if (g->state == MENU)
                     {
@@ -152,10 +173,13 @@ int main(int argc, char *argv[])
         if (mf >= 16.0)
             mf = 0;
         //
-        entity_think_all();
-        entity_update_all();
-        camera_world_snap();
-        //
+        if (g->state == MAP)
+        {
+            entity_think_all();
+            entity_update_all();
+            camera_world_snap();
+        }
+
         gf2d_graphics_clear_screen(); // clears drawing buffers
                                       // all drawing should happen betweem clear_screen and next_frame
         // backgrounds drawn first
@@ -173,6 +197,8 @@ int main(int argc, char *argv[])
             if (!battle_battle(g))
             {
                 g->state = MAP;
+                play_music(g->sounds[WORLD_MUS], 0);
+
                 // either exit or reset player/allies health
                 if (!g->n_allies)
                 {
@@ -230,6 +256,8 @@ int main(int argc, char *argv[])
     level_free(g->lava);
     entity_free(g->ent);
 
+    free_sounds();
+
     nk_sdl_shutdown();
     slog("---==== END ====---");
     return 0;
@@ -240,6 +268,8 @@ void pause_menu(global_state *g)
     struct nk_context *ctx = g->ctx;
     int flags = NK_WINDOW_BORDER;
     int alignment = NK_TEXT_CENTERED;
+    int mus_vol = 0;
+    int snd_vol = 0;
 
     if (nk_begin(ctx, "Main Menu", nk_rect(10, 500, 200, 200), flags))
     {
@@ -248,7 +278,7 @@ void pause_menu(global_state *g)
         nk_label(ctx, "Main Menu", alignment);
 
         // Start/Resume
-        if (nk_button_label(ctx, "Resume"))
+        if (nk_button_label(ctx, "Play"))
         {
             g->state = g->old_state;
         }
@@ -264,6 +294,21 @@ void pause_menu(global_state *g)
         if (nk_button_label(ctx, "Exit"))
         {
             g->state = EXIT;
+        }
+
+        nk_layout_row_dynamic(ctx, 0, 2);
+
+        nk_label(ctx, "Music:", NK_TEXT_LEFT);
+        mus_vol = nk_slider_int(ctx, 0, &g->music_vol, 100, 1);
+        nk_label(ctx, "Effects:", NK_TEXT_LEFT);
+        snd_vol = nk_slider_int(ctx, 0, &g->sound_effect_vol, 100, 1);
+        if (snd_vol || mus_vol)
+        {
+            set_volume();
+        }
+        if (snd_vol)
+        {
+            play_sound(g->sounds[ATTACK], 0);
         }
     }
     nk_end(ctx);
