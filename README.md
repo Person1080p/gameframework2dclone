@@ -63,3 +63,28 @@ The `./config` folder is where most game functions are
     - Lava Floor
 
 <!---10/10-->
+# Final Deliverables
+
+## Common Deliverables
+- Contained Game Experience
+    - Incomplete
+- Audio
+    - Incomplete
+- Research Component - Procedurely Generated Levels
+    - Done
+- Content Editor - Level Editor
+    - Incomplete
+- Asset Consistency
+    - Incomplete
+
+## Assigned Deliverables
+- Customizable Team (Abilities)
+    - Incomplete
+- Monster Negotiation
+    - Incomplete
+- Monster Fusion
+    - Incomplete
+- Items (Consumables, 10 Consumables), (Damage, heal, new ability)
+    - Incomplete
+- Ability Affinities (Fire, water, weak, strong)
+    - Incomplete
