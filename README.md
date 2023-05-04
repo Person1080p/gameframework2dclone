@@ -73,7 +73,7 @@ The `./config` folder is where most game functions are
 - Research Component - Procedurely Generated Levels
     - Done
 - Content Editor - Level Editor
-    - Incomplete
+    - Maybe, using html and js if it counts for anything
 - Asset Consistency
     - Incomplete
 
